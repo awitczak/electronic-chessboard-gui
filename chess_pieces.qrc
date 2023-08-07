@@ -1,0 +1,16 @@
+<RCC>
+    <qresource prefix="/">
+        <file>staunty/bB.svg</file>
+        <file>staunty/bK.svg</file>
+        <file>staunty/bN.svg</file>
+        <file>staunty/bP.svg</file>
+        <file>staunty/bQ.svg</file>
+        <file>staunty/bR.svg</file>
+        <file>staunty/wB.svg</file>
+        <file>staunty/wK.svg</file>
+        <file>staunty/wN.svg</file>
+        <file>staunty/wP.svg</file>
+        <file>staunty/wQ.svg</file>
+        <file>staunty/wR.svg</file>
+    </qresource>
+</RCC>
