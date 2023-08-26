@@ -32,13 +32,17 @@ public:
     void startDeviceDiscovery();
 
 signals:
-    void updateEvalBar(QString eval);
+    void updateEvalBar(QString eval, bool whoseTurn);
+    void bestMoveFound(QString best_move);
+    void reset();
 
 private slots:
     void output(QString data);
     void handle_FEN_textEdit_Pressed(Chessboard* chessboard, QString FEN);
     void eChessboardOutput(const QByteArray &data);
     void setChessPosition(Chessboard* chessboard, ChessGame* chess_game, const QByteArray &data);
+    void initiateReset();
+    void getWhoseTurnInfo(bool turnInfo);
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;
@@ -46,9 +50,13 @@ protected:
 private:
     Ui::MainWindow *ui;
 
-
     QTextEdit *engine_output;
     QTextEdit *eChessboard_output;
-    Stockfish m_stockfish;
+
+    Stockfish *stockfish;
+    Chessboard *chessboard;
+    ChessGame *chess_game;
+
+    bool whoseTurn = true;
 };
 #endif // MAINWINDOW_H

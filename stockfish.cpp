@@ -42,6 +42,23 @@ void Stockfish::send(QByteArray cmd)
     m_process.write(cmd + "\n");
 }
 
+void Stockfish::updateFEN(QByteArray FEN)
+{
+    m_process.write("position fen " + FEN + "\n");
+
+    qDebug() << "position fen " + FEN + "\n";
+
+    // evaluate
+    m_process.write("go depth 20\n");
+}
+
+void Stockfish::resetStockfish()
+{
+    send("ucinewgame");
+    send("isready");
+    send("go depth 20");
+}
+
 void Stockfish::errorOccurred(QProcess::ProcessError error)
 {
     if (!m_listening) return;
@@ -78,7 +95,10 @@ void Stockfish::readyReadStandardOutput()
 
 void Stockfish::started()
 {
-
+    send("uci");
+    send("isready");
+    send("position startpos");
+    send("go depth 20");
 }
 
 void Stockfish::stateChanged(QProcess::ProcessState newState)

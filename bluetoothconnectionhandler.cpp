@@ -34,7 +34,19 @@ void BluetoothConnectionHandler::startDeviceDiscovery()
 
 void BluetoothConnectionHandler::connectToDevice(const QBluetoothDeviceInfo &deviceInfo, const QString &serviceUuid)
 {
+    socket->abort();
     socket->connectToService(deviceInfo.address(), QBluetoothUuid(serviceUuid));
+}
+
+void BluetoothConnectionHandler::sendCommand(const QByteArray &command)
+{
+    if (socket->state() == QBluetoothSocket::SocketState::ConnectedState) {
+        socket->write(command);
+    } else {
+        qDebug() << "Not connected to a Bluetooth device. Cannot send command.";
+    }
+
+    qDebug() << command;
 }
 
 void BluetoothConnectionHandler::onDeviceDiscovered(const QBluetoothDeviceInfo &deviceInfo)
@@ -42,11 +54,13 @@ void BluetoothConnectionHandler::onDeviceDiscovered(const QBluetoothDeviceInfo &
     qDebug() << "Discovered device: " << deviceInfo.name() << "Address: " << deviceInfo.address().toString();
 
     if (deviceInfo.name() == "BT_CHESSBOARD") {
+
+        deviceDiscoveryAgent->stop();
+
         deviceName = deviceInfo.name();
         deviceAddress = deviceInfo.address().toString();
 
         connectToDevice(deviceInfo, "00001101-0000-1000-8000-00805F9B34FB");
-
 //        serviceDiscoveryAgent->start();
     }
 }
@@ -68,16 +82,24 @@ void BluetoothConnectionHandler::onDeviceDiscoveryFinished()
 
 void BluetoothConnectionHandler::onReadyRead()
 {
-    QByteArray data = socket->readAll();
+    data += socket->readAll();
 
-    qDebug() << "Data from BluetoothDevice: " << data;
+    while (data.contains('\n')) {
+        int newlineIdx = data.indexOf('\n');
+        QByteArray completeLine = data.left(newlineIdx - 1);
+        data.remove(0, newlineIdx + 1);
 
-    emit dataReceived(data);
+        emit dataReceived(completeLine);
+    }
 }
 
 void BluetoothConnectionHandler::onConnected()
 {
     qDebug() << "Connected to Bluetooth device!";
+
+    sendCommand("RESET");
+
+    emit boardReset();
 }
 
 void BluetoothConnectionHandler::onDisconnected()

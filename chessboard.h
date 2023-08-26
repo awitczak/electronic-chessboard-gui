@@ -17,22 +17,29 @@ class Chessboard : public QWidget
 
 public:
     Chessboard(QWidget *parent = nullptr);
-    void updateChessboard();
+
     void updateField(const int X, const int Y, const char piece);
+    void updateFieldBackground(const int X, const int Y, const QString style);
     void setBoardStateFromFEN(const char* FEN_string);
-    void setPosition(const char* FEN_string);
     void print_board_state();
     QString getPieceFromLetter(const char pieceLetter);
+    void showBestMove(QString best_move);
 
+public slots:
+    void updateChessboard(std::vector<std::vector<char>> board_state);
+    void resetChessboard();
 
 private:
     const char* start_pos = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-    static const int N_squares = 64;
-    char board_state[N_squares];
+    std::vector<std::vector<char>> board_state{8, std::vector<char>(8, '0')};
+
+    int past_best_move[4];
 
     QGridLayout *chessboard;
 
     void createChessboard();
+    void clearBestMoveHistory();
+    void repaintChessboard();
 
 protected:
     void resizeEvent(QResizeEvent *event) override;

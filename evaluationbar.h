@@ -26,7 +26,8 @@ signals:
 
 public slots:
     void resizeEvalBar(int height);
-    void updateEvalBar(QString eval);
+    void updateEvalBar(QString eval, bool whoseTurn);
+    void resetEvalBar();
 };
 
 #endif // EVALUATIONBAR_H

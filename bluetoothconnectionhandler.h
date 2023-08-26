@@ -13,9 +13,11 @@ public:
 
     void startDeviceDiscovery();
     void connectToDevice(const QBluetoothDeviceInfo &deviceInfo, const QString &serviceUuid);
+    void sendCommand(const QByteArray &command);
 
 signals:
     void dataReceived(const QByteArray &data);
+    void boardReset();
 
 private slots:
     void onDeviceDiscovered(const QBluetoothDeviceInfo &deviceInfo);
@@ -35,6 +37,8 @@ private:
 
     QString deviceAddress;
     QString deviceName;
+
+    QByteArray data;
 };
 
 #endif // BLUETOOTHCONNECTIONHANDLER_H

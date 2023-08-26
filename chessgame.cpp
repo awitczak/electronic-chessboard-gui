@@ -4,7 +4,7 @@ ChessGame::ChessGame(QObject *parent)
     : QObject{parent}
 {
     updateBoardState(start_pos_FEN);
-    printBoardState();
+    whoseTurn = true;
 }
 
 void ChessGame::printBoardState()
@@ -120,6 +120,7 @@ std::string ChessGame::getFENfromBoardState()
 {
     std::string current_FEN = "";
 
+    // add board position info
     int cnt = 0;
     for (int y = 0; y < 8; y++) {
         for (int x = 0; x < 8; x++) {
@@ -138,6 +139,10 @@ std::string ChessGame::getFENfromBoardState()
 
         cnt = 0;
     }
+
+    // add the turn info
+    if (whoseTurn) current_FEN += " w";
+    else current_FEN += " b";
 
     return current_FEN;
 }
@@ -173,4 +178,60 @@ void ChessGame::setAlgebraicNotation(std::vector<std::string> new_chess_algebrai
 std::vector<std::string> ChessGame::getAlgebraicNotation()
 {
     return chess_algebraic_notation;
+}
+
+void ChessGame::setDepth(int new_depth)
+{
+    depth = new_depth;
+}
+
+void ChessGame::resetChessGame()
+{
+    updateBoardState(start_pos_FEN);
+    setFEN(start_pos_FEN);
+    whoseTurn = true;
+}
+
+void ChessGame::getChessboardOutput(const QByteArray &data)
+{
+    QString chessboardData = QString::fromUtf8(data);
+
+    QStringList dataList = chessboardData.split('#');
+
+    if (dataList[0] == "1") {
+
+        whoseTurn = !whoseTurn;
+
+        e_chessboard_position_data = dataList[1].toStdString();
+        short_chess_algebraic_notation.push_back(dataList[2].toStdString());
+        e_chessboard_move_data = dataList[3].toStdString();
+
+        // position data to board_state
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                // sigh - temporary, as the firmware of the chessboard remains unchanged
+                int idx = i * 8 + j;
+                if (e_chessboard_position_data[idx] == 'a') board_state[i][j] = 'p';
+                else if (e_chessboard_position_data[idx] == 'b') board_state[i][j] = 'n';
+                else if (e_chessboard_position_data[idx] == 'c') board_state[i][j] = 'b';
+                else if (e_chessboard_position_data[idx] == 'd') board_state[i][j] = 'r';
+                else if (e_chessboard_position_data[idx] == 'e') board_state[i][j] = 'q';
+                else if (e_chessboard_position_data[idx] == 'f') board_state[i][j] = 'k';
+                else if (e_chessboard_position_data[idx] == '1') board_state[i][j] = 'P';
+                else if (e_chessboard_position_data[idx] == '2') board_state[i][j] = 'N';
+                else if (e_chessboard_position_data[idx] == '3') board_state[i][j] = 'B';
+                else if (e_chessboard_position_data[idx] == '4') board_state[i][j] = 'R';
+                else if (e_chessboard_position_data[idx] == '5') board_state[i][j] = 'Q';
+                else if (e_chessboard_position_data[idx] == '6') board_state[i][j] = 'K';
+                else board_state[i][j] = '0';
+            }
+        }
+
+        // FEN from board_state
+        setFEN(getFENfromBoardState());
+
+        emit boardStateChanged(board_state);
+        emit sendFENtoStockfish(QByteArray::fromStdString(FEN));
+        emit whoseTurnInfo(whoseTurn);
+    }
 }

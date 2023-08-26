@@ -22,6 +22,8 @@ public slots:
     void start();
     void stop();
     void send(QByteArray cmd);
+    void updateFEN(QByteArray FEN);
+    void resetStockfish();
 
 private slots:
     void errorOccurred(QProcess::ProcessError error);

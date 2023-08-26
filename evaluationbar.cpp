@@ -76,7 +76,7 @@ void EvaluationBar::resizeEvalBar(int height)
     this->setMaximumHeight(height);
 }
 
-void EvaluationBar::updateEvalBar(QString eval)
+void EvaluationBar::updateEvalBar(QString eval, bool whoseTurn)
 {
     std::string dataString = eval.toStdString();
 
@@ -104,5 +104,16 @@ void EvaluationBar::updateEvalBar(QString eval)
             line = "";
         }
     }
-    setEvalValue(newEvalValue/100);
+
+    if (!whoseTurn) {
+        setEvalValue(newEvalValue/100 * -1);
+    }
+    else {
+        setEvalValue(newEvalValue/100);
+    }
+}
+
+void EvaluationBar::resetEvalBar()
+{
+    setEvalValue(0.0);
 }

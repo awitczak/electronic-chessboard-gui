@@ -19,17 +19,10 @@ public:
 private:
     int minWidth = 100, minHeight = 100;
     QLabel *icon;
-    QPoint dragStartPosition;
-    char chess_piece;
 
 protected:
     void resizeEvent(QResizeEvent *event) override;
 
-    void mousePressEvent(QMouseEvent *event) override;
-    void mouseMoveEvent(QMouseEvent *event) override;
-    void mouseReleaseEvent(QMouseEvent *event) override;
-    void dragEnterEvent(QDragEnterEvent *event) override;
-    void dropEvent(QDropEvent *event) override;
 };
 
 #endif // CHESSBOARDSQUARE_H
