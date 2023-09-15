@@ -15,11 +15,14 @@ public:
 
 protected:
     void paintEvent(QPaintEvent *event) override;
+    void resizeEvent(QResizeEvent *event) override;
 
 
 private:
     float currentEvalValue;
+    int currentHeight;
 
+    void setCurrentHeight(int height);
     int mapFloatToIntRange(float value, float inputMin, float inputMax, int outputMin, int outputMax);
 
 signals:

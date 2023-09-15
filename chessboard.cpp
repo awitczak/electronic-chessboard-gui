@@ -4,6 +4,8 @@ Chessboard::Chessboard(QWidget *parent) : QWidget(parent)
 {
     clearBestMoveHistory();
     createChessboard();
+
+    setMinimumSize(800, 800);
 }
 
 void Chessboard::createChessboard()
@@ -29,9 +31,9 @@ void Chessboard::createChessboard()
         }
     }
 
+    chessboard->setContentsMargins(0, 0, 0, 0);
     chessboard->setSpacing(0);
     setLayout(chessboard);
-    setMinimumSize(800, 800);
 }
 
 void Chessboard::clearBestMoveHistory()

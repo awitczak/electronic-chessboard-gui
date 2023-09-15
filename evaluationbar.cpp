@@ -3,8 +3,8 @@
 EvaluationBar::EvaluationBar(QWidget *parent)
     : QWidget{parent}
 {
-    setMaximumWidth(30);
-    setMinimumSize(30, 800);
+    setFixedWidth(30);
+    setMinimumHeight(800);
     setEvalValue(0.0);
 }
 
@@ -33,16 +33,26 @@ void EvaluationBar::paintEvent(QPaintEvent *event)
 
     if (currentEvalValue >= 0.0) {
         painter.setPen(Qt::black);
-        painter.setFont(QFont("Arial", 8));
+        painter.setFont(QFont("Arial", 9));
         QString evalText = QString::number(currentEvalValue, 'f', 2);
         painter.drawText(rect(), Qt::AlignHCenter | Qt::AlignBottom, evalText);
     }
     else {
         painter.setPen(Qt::white);
-        painter.setFont(QFont("Arial", 8));
+        painter.setFont(QFont("Arial", 9));
         QString evalText = QString::number(currentEvalValue, 'f', 2);
         painter.drawText(rect(), Qt::AlignHCenter | Qt::AlignTop, evalText);
     }
+}
+
+void EvaluationBar::resizeEvent(QResizeEvent *event)
+{
+    resize(30, currentHeight);
+}
+
+void EvaluationBar::setCurrentHeight(int height)
+{
+    currentHeight = height;
 }
 
 int EvaluationBar::mapFloatToIntRange(float value, float inputMin, float inputMax, int outputMin, int outputMax)
@@ -73,7 +83,7 @@ int EvaluationBar::mapFloatToIntRange(float value, float inputMin, float inputMa
 
 void EvaluationBar::resizeEvalBar(int height)
 {
-    this->setMaximumHeight(height);
+    setCurrentHeight(height);
 }
 
 void EvaluationBar::updateEvalBar(QString eval, bool whoseTurn)

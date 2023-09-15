@@ -15,6 +15,8 @@
 #include "bluetoothconnectionhandler.h"
 #include "chessgame.h"
 #include "evaluationbar.h"
+#include "objectdetectionhandler.h"
+#include "robotcommunicationhandler.h"
 
 
 QT_BEGIN_NAMESPACE
@@ -40,9 +42,19 @@ private slots:
     void output(QString data);
     void handle_FEN_textEdit_Pressed(Chessboard* chessboard, QString FEN);
     void eChessboardOutput(const QByteArray &data);
+    void robotCommunicationOutput(QString data);
     void setChessPosition(Chessboard* chessboard, ChessGame* chess_game, const QByteArray &data);
     void initiateReset();
     void getWhoseTurnInfo(bool turnInfo);
+
+    void object_detection_started();
+    void object_detection_stopped();
+
+    // buttons
+//    void btn_forwards_pressed();
+//    void btn_backwards_pressed();
+//    void btn_start_pressed();
+//    void btn_end_pressed();
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;
@@ -52,11 +64,20 @@ private:
 
     QTextEdit *engine_output;
     QTextEdit *eChessboard_output;
+    QTextEdit *robot_communication_output;
 
     Stockfish *stockfish;
     Chessboard *chessboard;
     ChessGame *chess_game;
+    ObjectDetectionHandler *object_detection;
+    RobotCommunicationHandler *robot_communication;
 
     bool whoseTurn = true;
+
+    // adding buttons
+    QPushButton *btn_forwards;
+    QPushButton *btn_backwards;
+    QPushButton *btn_start;
+    QPushButton *btn_end;
 };
 #endif // MAINWINDOW_H

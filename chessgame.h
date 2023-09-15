@@ -1,9 +1,8 @@
-#ifndef CHESSGAME_H
+﻿#ifndef CHESSGAME_H
 #define CHESSGAME_H
 
 #include <QObject>
 #include <QDebug>
-#include <QMutex>
 
 #include <algorithm>
 
@@ -25,6 +24,16 @@ public:
 
     void setDepth(int new_depth);
 
+    int current_position_idx;
+    void increaseCurrentPositionIdx();
+    void decreaseCurrentPositionIdx();
+    void setCurrentPositionIdx(int idx);
+    int getCurrentPositionIdx();
+
+    int latest_position_idx;
+    void setLatestPositionIdx(int idx);
+    int getLatestPositionIdx();
+
 public slots:
     void getChessboardOutput(const QByteArray &data);
     void resetChessGame();
@@ -35,11 +44,10 @@ signals:
     void whoseTurnInfo(bool whoseTurn);
 
 private:
-    QMutex mutex;
-
     std::vector<std::vector<char>> board_state{8, std::vector<char>(8, '0')};
     std::vector<std::string> chess_algebraic_notation, short_chess_algebraic_notation;
     const std::string start_pos_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+    std::vector<std::string> FEN_game_data;
     std::string FEN = "";
 
     std::string e_chessboard_position_data = "";

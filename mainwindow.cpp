@@ -11,7 +11,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 
     Stockfish *stockfish = new Stockfish();
-
+    ChessGame *chess_game = new ChessGame(this);
 
 
     // -------------------------- UI -----------------------------
@@ -30,30 +30,42 @@ MainWindow::MainWindow(QWidget *parent)
     int largeHeight = QGuiApplication::primaryScreen()->virtualSize().height();
     splitter->setSizes(QList<int>({largeHeight , largeHeight}));
 
-    leftWidget->setStyleSheet("background-color: rgb(200, 200, 200);");
-    rightWidget->setStyleSheet("background-color: rgb(200, 200, 200);");
+    leftWidget->setStyleSheet("background-color: rgb(180, 170, 185);");
+    rightWidget->setStyleSheet("background-color: rgb(180, 170, 185);");
 
-    QWidget *leftWidgetFirstRow = new QWidget(this);
+    QWidget *leftWidgetFirstRow = new QWidget(leftWidget);
 
     QHBoxLayout *leftWidgetFirstRowLayout = new QHBoxLayout(leftWidgetFirstRow);
     leftWidgetLayout->addWidget(leftWidgetFirstRow);
 
-    Chessboard *chessboard = new Chessboard(this);
-    EvaluationBar *evaluationBar = new EvaluationBar(this);
+    Chessboard *chessboard = new Chessboard(leftWidgetFirstRow);
+    EvaluationBar *evaluationBar = new EvaluationBar(leftWidgetFirstRow);
 
     leftWidgetFirstRowLayout->addWidget(evaluationBar);
     leftWidgetFirstRowLayout->addWidget(chessboard);
 
     leftWidgetFirstRow->setLayout(leftWidgetFirstRowLayout);
-    leftWidgetFirstRowLayout->setSpacing(0);
 
-    leftWidgetFirstRow->setStyleSheet("background-color: rgb(100, 100, 100);");
+    QWidget *leftWidgetSecondRow = new QWidget(leftWidget);
 
-    // adding buttons for forwards/backwards game viewing
-    QPushButton *btn_forwards = new QPushButton(this);
-    QPushButton *btn_backwards = new QPushButton(this);
-    leftWidgetLayout->addWidget(btn_forwards);
-    leftWidgetLayout->addWidget(btn_backwards);
+    QHBoxLayout *leftWidgetSecondRowLayout = new QHBoxLayout(leftWidgetSecondRow);
+    leftWidgetLayout->addWidget(leftWidgetSecondRow);
+
+    // adding buttons
+    QPushButton *btn_forwards = new QPushButton(leftWidgetSecondRow);
+    QPushButton *btn_backwards = new QPushButton(leftWidgetSecondRow);
+    QPushButton *btn_start = new QPushButton(leftWidgetSecondRow);
+    QPushButton *btn_end = new QPushButton(leftWidgetSecondRow);
+
+    btn_forwards->setText(">");
+    btn_backwards->setText("<");
+    btn_start->setText("<<");
+    btn_end->setText(">>");
+
+    leftWidgetSecondRowLayout->addWidget(btn_start);
+    leftWidgetSecondRowLayout->addWidget(btn_backwards);
+    leftWidgetSecondRowLayout->addWidget(btn_forwards);
+    leftWidgetSecondRowLayout->addWidget(btn_end);
 
 //    // create different tabs for the right widget
 //    QTabWidget* tabWidget = new QTabWidget(rightWidget);
@@ -100,19 +112,64 @@ MainWindow::MainWindow(QWidget *parent)
     QPushButton *btn_connect_bluetooth = new QPushButton(rightWidget);
     btn_connect_bluetooth->setText("Connect");
 
+    // labels
+    QLabel *lbl_engine_output = new QLabel(rightWidget);
+    lbl_engine_output->setText("Engine output:");
+
+    QLabel *lbl_eChessboard_output = new QLabel(rightWidget);
+    lbl_eChessboard_output->setText("e-Chessboard output:");
+
+    rightWidgetLayout->addWidget(lbl_engine_output);
     rightWidgetLayout->addWidget(engine_output);
     rightWidgetLayout->addWidget(inputTextBox_send);
     rightWidgetLayout->addWidget(inputTextBox_send2);
     rightWidgetLayout->addWidget(inputTextBox_send3);
+    rightWidgetLayout->addWidget(lbl_eChessboard_output);
     rightWidgetLayout->addWidget(eChessboard_output);
     rightWidgetLayout->addWidget(btn_connect_bluetooth);
 
+    // connecting the object detection script
+    QPushButton *btn_start_object_detection = new QPushButton(this);
+    QPushButton *btn_stop_object_detection = new QPushButton(this);
 
+    btn_start_object_detection->setText("start-object-det");
+    btn_stop_object_detection->setText("stop-object-det");
 
-    ChessGame *chess_game = new ChessGame(this);
+    rightWidgetLayout->addWidget(btn_start_object_detection);
+    rightWidgetLayout->addWidget(btn_stop_object_detection);
 
+    ObjectDetectionHandler *object_detection = new ObjectDetectionHandler(this);
 
+    object_detection->setPath("/home/adam/Desktop/object_detection/human_detection.py");
 
+    connect(btn_start_object_detection, &QPushButton::pressed, object_detection, &ObjectDetectionHandler::start);
+    connect(btn_stop_object_detection, &QPushButton::pressed, object_detection, &ObjectDetectionHandler::stop);
+
+    connect(object_detection, &ObjectDetectionHandler::object_detection_started, this, &MainWindow::object_detection_started);
+    connect(object_detection, &ObjectDetectionHandler::object_detection_stopped, this, &MainWindow::object_detection_stopped);
+
+    // connecting the robot communication script
+    QPushButton *btn_start_robot_communication = new QPushButton(this);
+    QPushButton *btn_stop_robot_communication = new QPushButton(this);
+
+    btn_start_robot_communication->setText("start-robot-com");
+    btn_stop_robot_communication->setText("stop-robot-com");
+
+    robot_communication_output = new QTextEdit(this);
+    robot_communication_output->setMinimumSize(400, 100);
+    robot_communication_output->setStyleSheet("background-color: rgb(255, 255, 255);");
+
+    rightWidgetLayout->addWidget(btn_start_robot_communication);
+    rightWidgetLayout->addWidget(btn_stop_robot_communication);
+    rightWidgetLayout->addWidget(robot_communication_output);
+
+    RobotCommunicationHandler *robot_communication = new RobotCommunicationHandler(this);
+
+    robot_communication->setPath("/home/adam/Desktop/robot-control/build/robot-control");
+
+    connect(btn_start_robot_communication, &QPushButton::pressed, robot_communication, &RobotCommunicationHandler::start);
+    connect(btn_stop_robot_communication, &QPushButton::pressed, robot_communication, &RobotCommunicationHandler::stop);
+    connect(robot_communication, &RobotCommunicationHandler::output, this, &MainWindow::robotCommunicationOutput);
 
 
 
@@ -161,6 +218,14 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(btn_connect_bluetooth, &QPushButton::pressed, this, &MainWindow::initiateReset);
 
+
+    // button press handling
+//    connect(btn_start, &QPushButton::pressed, this, &MainWindow::btn_start_pressed);
+//    connect(btn_end, &QPushButton::pressed, this, &MainWindow::btn_end_pressed);
+//    connect(btn_forwards, &QPushButton::pressed, this, &MainWindow::btn_forwards_pressed);
+//    connect(btn_backwards, &QPushButton::pressed, this, &MainWindow::btn_backwards_pressed);
+
+
     // engine handling
     stockfish->start();
 
@@ -205,6 +270,11 @@ void MainWindow::eChessboardOutput(const QByteArray &data)
     eChessboard_output->append(data);
 }
 
+void MainWindow::robotCommunicationOutput(QString data)
+{
+    robot_communication_output->append(data);
+}
+
 void MainWindow::setChessPosition(Chessboard *chessboard, ChessGame *chess_game, const QByteArray &data)
 {
     std::string dataString = data.toStdString();
@@ -238,6 +308,38 @@ void MainWindow::getWhoseTurnInfo(bool turnInfo)
 {
     whoseTurn = turnInfo;
 }
+
+void MainWindow::object_detection_started()
+{
+//    frame_object_detection_status->setStyleSheet("background-color: rgb(0, 255, 0);");
+    qDebug() << "this happened";
+}
+
+void MainWindow::object_detection_stopped()
+{
+//    frame_object_detection_status->setStyleSheet("background-color: rgb(255, 0, 0);");
+    qDebug() << "this happened2";
+}
+
+//void MainWindow::btn_forwards_pressed()
+//{
+//    chess_game->increaseCurrentPositionIdx();
+//}
+
+//void MainWindow::btn_backwards_pressed()
+//{
+//    chess_game->decreaseCurrentPositionIdx();
+//}
+
+//void MainWindow::btn_start_pressed()
+//{
+//    chess_game->setCurrentPositionIdx(0);
+//}
+
+//void MainWindow::btn_end_pressed()
+//{
+//    chess_game->setCurrentPositionIdx(chess_game->getLatestPositionIdx());
+//}
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {

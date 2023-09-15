@@ -17,6 +17,7 @@ void ChessboardSquare::setIcon(const QString &svg_path)
 void ChessboardSquare::resizeEvent(QResizeEvent *event)
 {
     int size = qMin(event->size().width(), event->size().height());
+
     resize(size, size);
     icon->resize(size, size);
 }

@@ -3,6 +3,9 @@
 ChessGame::ChessGame(QObject *parent)
     : QObject{parent}
 {
+    FEN_game_data.push_back(start_pos_FEN);
+    current_position_idx = 0;
+
     updateBoardState(start_pos_FEN);
     whoseTurn = true;
 }
@@ -185,8 +188,43 @@ void ChessGame::setDepth(int new_depth)
     depth = new_depth;
 }
 
+void ChessGame::increaseCurrentPositionIdx()
+{
+    qDebug() << current_position_idx;
+    current_position_idx++;
+}
+
+void ChessGame::decreaseCurrentPositionIdx()
+{
+    current_position_idx--;
+}
+
+void ChessGame::setCurrentPositionIdx(int idx)
+{
+    current_position_idx = idx;
+}
+
+int ChessGame::getCurrentPositionIdx()
+{
+    return current_position_idx;
+}
+
+void ChessGame::setLatestPositionIdx(int idx)
+{
+    latest_position_idx = idx;
+}
+
+int ChessGame::getLatestPositionIdx()
+{
+    return latest_position_idx;
+}
+
 void ChessGame::resetChessGame()
 {
+    FEN_game_data.clear();
+    FEN_game_data.push_back(start_pos_FEN);
+    current_position_idx = 0;
+
     updateBoardState(start_pos_FEN);
     setFEN(start_pos_FEN);
     whoseTurn = true;
