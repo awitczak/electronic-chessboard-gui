@@ -33,8 +33,9 @@ void RobotCommunicationHandler::start()
 
 void RobotCommunicationHandler::stop()
 {
+    send("exit");
+    m_process.terminate();
     m_listening = false;
-    m_process.close();
 }
 
 void RobotCommunicationHandler::send(QByteArray cmd)

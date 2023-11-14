@@ -9,8 +9,8 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Svg Bluetooth)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Svg Bluetooth)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Svg Bluetooth SerialPort)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Svg Bluetooth SerialPort)
 
 set(PROJECT_SOURCES
         main.cpp
@@ -36,6 +36,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         ${PROJECT_SOURCES}
         objectdetectionhandler.h objectdetectionhandler.cpp
         robotcommunicationhandler.h robotcommunicationhandler.cpp
+        serialporthandler.h serialporthandler.cpp
+        scheduler.h scheduler.cpp
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET chessboard_GUI APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
@@ -55,7 +57,7 @@ else()
     endif()
 endif()
 
-target_link_libraries(chessboard_GUI PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Svg Qt${QT_VERSION_MAJOR}::Bluetooth)
+target_link_libraries(chessboard_GUI PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Svg Qt${QT_VERSION_MAJOR}::Bluetooth Qt${QT_VERSION_MAJOR}::SerialPort)
 
 set_target_properties(chessboard_GUI PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com

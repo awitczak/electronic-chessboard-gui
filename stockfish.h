@@ -38,6 +38,7 @@ private:
     QProcess m_process;
     QString m_path;
     bool m_listening;
+
     QString getProcess();
     void startStockfish();
 };

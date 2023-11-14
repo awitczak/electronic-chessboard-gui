@@ -15,6 +15,7 @@ protected:
 
 signals:
     void enterPressed();
+    void getData(const QByteArray &data);
 };
 
 #endif // INPUTTEXTBOX_H

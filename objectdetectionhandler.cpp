@@ -54,6 +54,8 @@ void ObjectDetectionHandler::readyReadStandardError()
 {
     QByteArray data = m_process.readAllStandardError();
     qDebug() << "Standard Error: " << data;
+
+    emit output(data);
 }
 
 void ObjectDetectionHandler::readyReadStandardOutput()

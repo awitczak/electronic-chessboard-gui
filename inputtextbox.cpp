@@ -7,12 +7,27 @@ InputTextBox::InputTextBox(QWidget *parent) : QTextEdit(parent)
 
 void InputTextBox::keyPressEvent(QKeyEvent *event)
 {
-    if (event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter)
-    {
+    switch (event->key()) {
+    case Qt::Key_Enter:
         emit enterPressed();
+        emit getData(toPlainText().toLocal8Bit());
+
         clear();
 
         return;
+
+        break;
+    case Qt::Key_Return:
+        emit enterPressed();
+        emit getData(toPlainText().toLocal8Bit());
+
+        clear();
+
+        return;
+
+        break;
+    default:
+        break;
     }
 
     QTextEdit::keyPressEvent(event);

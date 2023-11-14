@@ -7,7 +7,6 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-//    showMaximized();
 
 
     Stockfish *stockfish = new Stockfish();
@@ -67,21 +66,90 @@ MainWindow::MainWindow(QWidget *parent)
     leftWidgetSecondRowLayout->addWidget(btn_forwards);
     leftWidgetSecondRowLayout->addWidget(btn_end);
 
-//    // create different tabs for the right widget
-//    QTabWidget* tabWidget = new QTabWidget(rightWidget);
-
-//    QWidget* tab1 = new QWidget(tabWidget);
-//    QWidget* tab2 = new QWidget(tabWidget);
-//    QWidget* tab3 = new QWidget(tabWidget);
-
-//    tabWidget->addTab(tab1, "tab 1");
-//    tabWidget->addTab(tab2, "tab 2");
-//    tabWidget->addTab(tab3, "tab 3");
-
-    // tab 1 - engine connection
+    // right widget
     QVBoxLayout *rightWidgetLayout = new QVBoxLayout(rightWidget);
 
-    engine_output = new QTextEdit(this);
+    // create different tabs for the right widget
+    QTabWidget* tabWidget = new QTabWidget();
+
+    QScrollArea* tab1 = new QScrollArea(tabWidget);
+    QScrollArea* tab2 = new QScrollArea(tabWidget);
+    QScrollArea* tab3 = new QScrollArea(tabWidget);
+    QScrollArea* tab4 = new QScrollArea(tabWidget);
+    QScrollArea* tab5 = new QScrollArea(tabWidget);
+
+    tabWidget->addTab(tab1, "Debug 1");
+    tabWidget->addTab(tab2, "Debug 2");
+    tabWidget->addTab(tab3, "Debug 3");
+    tabWidget->addTab(tab4, "Debug 4");
+    tabWidget->addTab(tab5, "Debug 5");
+
+    QWidget* tab1_widget = new QWidget(tab1);
+    QWidget* tab2_widget = new QWidget(tab2);
+    QWidget* tab3_widget = new QWidget(tab3);
+    QWidget* tab4_widget = new QWidget(tab4);
+    QWidget* tab5_widget = new QWidget(tab5);
+
+    QVBoxLayout *tab1WidgetLayout = new QVBoxLayout(tab1_widget);
+    QVBoxLayout *tab2WidgetLayout = new QVBoxLayout(tab2_widget);
+    QVBoxLayout *tab3WidgetLayout = new QVBoxLayout(tab3_widget);
+    QVBoxLayout *tab4WidgetLayout = new QVBoxLayout(tab4_widget);
+    QVBoxLayout *tab5WidgetLayout = new QVBoxLayout(tab5_widget);
+
+    tab1->setWidget(tab1_widget);
+    tab1->setWidgetResizable(true);
+    tab1->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    tab1->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+
+    tab2->setWidget(tab2_widget);
+    tab2->setWidgetResizable(true);
+    tab2->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    tab2->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+
+    tab3->setWidget(tab3_widget);
+    tab3->setWidgetResizable(true);
+    tab3->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    tab3->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+
+    tab4->setWidget(tab4_widget);
+    tab4->setWidgetResizable(true);
+    tab4->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    tab4->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+
+    tab5->setWidget(tab5_widget);
+    tab5->setWidgetResizable(true);
+    tab5->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    tab5->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+
+    rightWidgetLayout->addWidget(tabWidget);
+
+    engine_output = new QPlainTextEdit();
+    engine_output->verticalScrollBar()->setStyleSheet(
+        "QScrollBar:vertical {"
+        "    border: 2px solid #999999;"
+        "    background: #f0f0f0;"
+        "    width: 16px;"
+        "    margin: 22px 0 22px 0;"
+        "}"
+        "QScrollBar::handle:vertical {"
+        "    background: #666666;"
+        "    min-height: 20px;"
+        "}"
+        "QScrollBar::add-line:vertical {"
+        "    border: 2px solid #999999;"
+        "    background: #f0f0f0;"
+        "    height: 20px;"
+        "    subcontrol-position: bottom;"
+        "    subcontrol-origin: margin;"
+        "}"
+        "QScrollBar::sub-line:vertical {"
+        "    border: 2px solid #999999;"
+        "    background: #f0f0f0;"
+        "    height: 20px;"
+        "    subcontrol-position: top;"
+        "    subcontrol-origin: margin;"
+        "}"
+       );
     engine_output->setMinimumSize(400, 100);
     engine_output->setStyleSheet("background-color: rgb(255, 255, 255);");
 
@@ -91,20 +159,14 @@ MainWindow::MainWindow(QWidget *parent)
     inputTextBox_send->setMaximumHeight(30);
     inputTextBox_send->setStyleSheet("background-color: rgb(255, 255, 255);");
 
-    // send commands to chessboard
-    InputTextBox *inputTextBox_send2 = new InputTextBox(this);
-    inputTextBox_send2->setMinimumSize(400, 30);
-    inputTextBox_send2->setMaximumHeight(30);
-    inputTextBox_send2->setStyleSheet("background-color: rgb(255, 255, 255);");
-
-    // send an algebraic chess notation for the program to set
-    InputTextBox *inputTextBox_send3 = new InputTextBox(this);
-    inputTextBox_send3->setMinimumSize(400, 30);
-    inputTextBox_send3->setMaximumHeight(30);
-    inputTextBox_send3->setStyleSheet("background-color: rgb(255, 255, 255);");
+//    // send an algebraic chess notation for the program to set
+//    InputTextBox *inputTextBox_send3 = new InputTextBox(this);
+//    inputTextBox_send3->setMinimumSize(400, 30);
+//    inputTextBox_send3->setMaximumHeight(30);
+//    inputTextBox_send3->setStyleSheet("background-color: rgb(255, 255, 255);");
 
     // a text box with data received from the e-chessboard
-    eChessboard_output = new QTextEdit(this);
+    eChessboard_output = new QPlainTextEdit(this);
     eChessboard_output->setMinimumSize(400, 100);
     eChessboard_output->setStyleSheet("background-color: rgb(255, 255, 255);");
 
@@ -119,14 +181,15 @@ MainWindow::MainWindow(QWidget *parent)
     QLabel *lbl_eChessboard_output = new QLabel(rightWidget);
     lbl_eChessboard_output->setText("e-Chessboard output:");
 
-    rightWidgetLayout->addWidget(lbl_engine_output);
-    rightWidgetLayout->addWidget(engine_output);
-    rightWidgetLayout->addWidget(inputTextBox_send);
-    rightWidgetLayout->addWidget(inputTextBox_send2);
-    rightWidgetLayout->addWidget(inputTextBox_send3);
-    rightWidgetLayout->addWidget(lbl_eChessboard_output);
-    rightWidgetLayout->addWidget(eChessboard_output);
-    rightWidgetLayout->addWidget(btn_connect_bluetooth);
+    tab1WidgetLayout->addWidget(lbl_engine_output);
+    tab1WidgetLayout->addWidget(engine_output);
+    tab1WidgetLayout->addWidget(inputTextBox_send);
+
+//    rightWidgetLayout->addWidget(inputTextBox_send3);
+
+    tab2WidgetLayout->addWidget(lbl_eChessboard_output);
+    tab2WidgetLayout->addWidget(eChessboard_output);
+    tab2WidgetLayout->addWidget(btn_connect_bluetooth);
 
     // connecting the object detection script
     QPushButton *btn_start_object_detection = new QPushButton(this);
@@ -135,8 +198,17 @@ MainWindow::MainWindow(QWidget *parent)
     btn_start_object_detection->setText("start-object-det");
     btn_stop_object_detection->setText("stop-object-det");
 
-    rightWidgetLayout->addWidget(btn_start_object_detection);
-    rightWidgetLayout->addWidget(btn_stop_object_detection);
+    QLabel *lbl_object_detection_output = new QLabel(rightWidget);
+    lbl_object_detection_output->setText("Object detection output:");
+
+    object_detection_output = new QPlainTextEdit(this);
+    object_detection_output->setMinimumSize(400, 100);
+    object_detection_output->setStyleSheet("background-color: rgb(255, 255, 255);");
+
+    tab3WidgetLayout->addWidget(btn_start_object_detection);
+    tab3WidgetLayout->addWidget(btn_stop_object_detection);
+    tab3WidgetLayout->addWidget(lbl_object_detection_output);
+    tab3WidgetLayout->addWidget(object_detection_output);
 
     ObjectDetectionHandler *object_detection = new ObjectDetectionHandler(this);
 
@@ -144,6 +216,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(btn_start_object_detection, &QPushButton::pressed, object_detection, &ObjectDetectionHandler::start);
     connect(btn_stop_object_detection, &QPushButton::pressed, object_detection, &ObjectDetectionHandler::stop);
+    connect(object_detection, &ObjectDetectionHandler::output, this, &MainWindow::objectDetectionOutput);
 
     connect(object_detection, &ObjectDetectionHandler::object_detection_started, this, &MainWindow::object_detection_started);
     connect(object_detection, &ObjectDetectionHandler::object_detection_stopped, this, &MainWindow::object_detection_stopped);
@@ -155,13 +228,23 @@ MainWindow::MainWindow(QWidget *parent)
     btn_start_robot_communication->setText("start-robot-com");
     btn_stop_robot_communication->setText("stop-robot-com");
 
-    robot_communication_output = new QTextEdit(this);
+    QLabel *lbl_robot_communication_output = new QLabel(rightWidget);
+    lbl_robot_communication_output->setText("Robot communication:");
+
+    robot_communication_output = new QPlainTextEdit(this);
     robot_communication_output->setMinimumSize(400, 100);
     robot_communication_output->setStyleSheet("background-color: rgb(255, 255, 255);");
 
-    rightWidgetLayout->addWidget(btn_start_robot_communication);
-    rightWidgetLayout->addWidget(btn_stop_robot_communication);
-    rightWidgetLayout->addWidget(robot_communication_output);
+    InputTextBox *itb_robot_communication = new InputTextBox(this);
+    itb_robot_communication->setMinimumSize(400, 30);
+    itb_robot_communication->setMaximumHeight(30);
+    itb_robot_communication->setStyleSheet("background-color: rgb(255, 255, 255);");
+
+    tab4WidgetLayout->addWidget(lbl_robot_communication_output);
+    tab4WidgetLayout->addWidget(btn_start_robot_communication);
+    tab4WidgetLayout->addWidget(btn_stop_robot_communication);
+    tab4WidgetLayout->addWidget(robot_communication_output);
+    tab4WidgetLayout->addWidget(itb_robot_communication);
 
     RobotCommunicationHandler *robot_communication = new RobotCommunicationHandler(this);
 
@@ -170,6 +253,11 @@ MainWindow::MainWindow(QWidget *parent)
     connect(btn_start_robot_communication, &QPushButton::pressed, robot_communication, &RobotCommunicationHandler::start);
     connect(btn_stop_robot_communication, &QPushButton::pressed, robot_communication, &RobotCommunicationHandler::stop);
     connect(robot_communication, &RobotCommunicationHandler::output, this, &MainWindow::robotCommunicationOutput);
+    connect(itb_robot_communication, &InputTextBox::enterPressed, robot_communication, [robot_communication, itb_robot_communication](){robot_communication->send(itb_robot_communication->toPlainText().toUtf8());});
+
+    SerialPortHandler *serial_port = new SerialPortHandler();
+
+    tab5WidgetLayout->addWidget(serial_port);
 
 
 
@@ -180,7 +268,6 @@ MainWindow::MainWindow(QWidget *parent)
     // signals
     connect(stockfish, &Stockfish::output, this, &MainWindow::output);
     connect(inputTextBox_send, &InputTextBox::enterPressed, stockfish, [stockfish, inputTextBox_send](){stockfish->send(inputTextBox_send->toPlainText().toUtf8());});
-    connect(inputTextBox_send2, &InputTextBox::enterPressed, this, [this, chessboard, inputTextBox_send2]() {handle_FEN_textEdit_Pressed(chessboard, inputTextBox_send2->toPlainText());});
 
     connect(chessboard, &Chessboard::resizeEvalBar, evaluationBar, &EvaluationBar::resizeEvalBar);
 
@@ -198,7 +285,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(connection, &BluetoothConnectionHandler::dataReceived, chess_game, &ChessGame::getChessboardOutput);
 
-    connect(inputTextBox_send3, &InputTextBox::enterPressed, this, [this, chessboard, chess_game, inputTextBox_send3]() {setChessPosition(chessboard, chess_game, inputTextBox_send3->toPlainText().toUtf8());});
+//    connect(inputTextBox_send3, &InputTextBox::enterPressed, this, [this, chessboard, chess_game, inputTextBox_send3]() {setChessPosition(chessboard, chess_game, inputTextBox_send3->toPlainText().toUtf8());});
 
     connect(this, &MainWindow::updateEvalBar, evaluationBar, &EvaluationBar::updateEvalBar);
 
@@ -229,7 +316,6 @@ MainWindow::MainWindow(QWidget *parent)
     // engine handling
     stockfish->start();
 
-
     statusBar()->hide();
 }
 
@@ -240,7 +326,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::output(QString data)
 {
-    engine_output->append(data);
+    engine_output->appendPlainText(data);
 
     if (data.contains("bestmove")) {
 
@@ -255,25 +341,22 @@ void MainWindow::output(QString data)
     emit updateEvalBar(data, whoseTurn);
 }
 
-void MainWindow::handle_FEN_textEdit_Pressed(Chessboard* chessboard, QString FEN)
-{
-//    chessboard->Chessboard::setBoardStateFromFEN(FEN.toUtf8());
-//    chessboard->updateChessboard();
-
-//    // send the FEN to the engine too
-//    m_stockfish.send("position fen " + FEN.toUtf8());
-//    m_stockfish.send("go depth 25");
-}
-
 void MainWindow::eChessboardOutput(const QByteArray &data)
 {
-    eChessboard_output->append(data);
+    eChessboard_output->appendPlainText(data);
 }
 
 void MainWindow::robotCommunicationOutput(QString data)
 {
-    robot_communication_output->append(data);
+    robot_communication_output->appendPlainText(data);
 }
+
+void MainWindow::objectDetectionOutput(QString data)
+{
+    if (data.endsWith('\n')) data.chop(1);
+    object_detection_output->appendPlainText(data);
+}
+
 
 void MainWindow::setChessPosition(Chessboard *chessboard, ChessGame *chess_game, const QByteArray &data)
 {

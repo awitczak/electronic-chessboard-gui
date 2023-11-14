@@ -8,6 +8,9 @@
 #include <QTimer>
 #include <QtBluetooth>
 #include <QPushButton>
+#include <QSerialPort>
+#include <QScrollArea>
+#include <QScrollBar>
 
 #include "stockfish.h"
 #include "chessboard.h"
@@ -17,6 +20,7 @@
 #include "evaluationbar.h"
 #include "objectdetectionhandler.h"
 #include "robotcommunicationhandler.h"
+#include "serialporthandler.h"
 
 
 QT_BEGIN_NAMESPACE
@@ -40,9 +44,9 @@ signals:
 
 private slots:
     void output(QString data);
-    void handle_FEN_textEdit_Pressed(Chessboard* chessboard, QString FEN);
     void eChessboardOutput(const QByteArray &data);
     void robotCommunicationOutput(QString data);
+    void objectDetectionOutput(QString data);
     void setChessPosition(Chessboard* chessboard, ChessGame* chess_game, const QByteArray &data);
     void initiateReset();
     void getWhoseTurnInfo(bool turnInfo);
@@ -62,22 +66,26 @@ protected:
 private:
     Ui::MainWindow *ui;
 
-    QTextEdit *engine_output;
-    QTextEdit *eChessboard_output;
-    QTextEdit *robot_communication_output;
+    InputTextBox *itb_robot_communication = nullptr;
 
-    Stockfish *stockfish;
-    Chessboard *chessboard;
-    ChessGame *chess_game;
-    ObjectDetectionHandler *object_detection;
-    RobotCommunicationHandler *robot_communication;
+    QPlainTextEdit *engine_output = nullptr;
+    QPlainTextEdit *eChessboard_output = nullptr;
+    QPlainTextEdit *object_detection_output = nullptr;
+    QPlainTextEdit *robot_communication_output = nullptr;
+
+    Stockfish *stockfish = nullptr;
+    Chessboard *chessboard = nullptr;
+    ChessGame *chess_game = nullptr;
+    ObjectDetectionHandler *object_detection = nullptr;
+    RobotCommunicationHandler *robot_communication = nullptr;
+    SerialPortHandler *serial_port = nullptr;
 
     bool whoseTurn = true;
 
     // adding buttons
-    QPushButton *btn_forwards;
-    QPushButton *btn_backwards;
-    QPushButton *btn_start;
-    QPushButton *btn_end;
+    QPushButton *btn_forwards = nullptr;
+    QPushButton *btn_backwards = nullptr;
+    QPushButton *btn_start = nullptr;
+    QPushButton *btn_end = nullptr;
 };
 #endif // MAINWINDOW_H
