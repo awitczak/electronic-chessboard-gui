@@ -13,10 +13,22 @@ public:
 
     void run() override;
 
+public slots:
+    void stockfishConnected();
 
 private:
-    bool isGameFinished;
-    int cnt;
+
+    typedef enum {
+        IDLE = 0,
+        WAIT_FOR_STOCKFISH,
+        STOCKFISH_CONNECTED
+    } State;
+
+    State state;
+
+    bool isFinished;
+
+    void mainLoop();
 
 };
 

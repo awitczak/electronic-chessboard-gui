@@ -12,6 +12,7 @@
 #include <QScrollArea>
 #include <QScrollBar>
 
+#include "scheduler.h"
 #include "stockfish.h"
 #include "chessboard.h"
 #include "inputtextbox.h"
@@ -73,6 +74,7 @@ private:
     QPlainTextEdit *object_detection_output = nullptr;
     QPlainTextEdit *robot_communication_output = nullptr;
 
+    Scheduler *scheduler = nullptr;
     Stockfish *stockfish = nullptr;
     Chessboard *chessboard = nullptr;
     ChessGame *chess_game = nullptr;

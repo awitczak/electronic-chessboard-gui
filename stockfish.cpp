@@ -144,4 +144,6 @@ void Stockfish::startStockfish()
     else command.append("\n");
 
     m_process.write(command);
+
+    emit connected();
 }

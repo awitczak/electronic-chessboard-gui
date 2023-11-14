@@ -16,6 +16,7 @@ public:
     void setPath(const QString &path);
 
 signals:
+    void connected();
     void output(QString data);
 
 public slots:

@@ -7,10 +7,12 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-
+    scheduler = new Scheduler();
 
     Stockfish *stockfish = new Stockfish();
     ChessGame *chess_game = new ChessGame(this);
+
+    connect(stockfish, &Stockfish::connected, scheduler, &Scheduler::stockfishConnected);
 
 
     // -------------------------- UI -----------------------------
