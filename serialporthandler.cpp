@@ -88,7 +88,7 @@ SerialPortHandler::SerialPortHandler(QWidget *parent)
     connect(btn_close, &QPushButton::clicked, this, &SerialPortHandler::close);
 
 //    connect(btn_send, &QPushButton::clicked, this, &SerialPortHandler::writeData);
-    connect(input_serialPort, &InputTextBox::getData, this, &SerialPortHandler::writeData);
+    connect(input_serialPort, &InputTextBox::enterPressed, this, &SerialPortHandler::writeData);
 
     show();
 }

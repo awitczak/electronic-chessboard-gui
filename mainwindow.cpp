@@ -9,10 +9,18 @@ MainWindow::MainWindow(QWidget *parent)
 
     scheduler = new Scheduler();
 
-    Stockfish *stockfish = new Stockfish();
-    ChessGame *chess_game = new ChessGame(this);
+    stockfish = new Stockfish();
+    chess_game = new ChessGame();
+    eChessboard_connection = new BluetoothConnectionHandler();
+    robot_communication = new RobotCommunicationHandler();
+    object_detection = new ObjectDetectionHandler();
+    serial_port = new SerialPortHandler();
 
+    // connecting features to the scheduler
     connect(stockfish, &Stockfish::connected, scheduler, &Scheduler::stockfishConnected);
+    connect(object_detection, &ObjectDetectionHandler::connected, scheduler, &Scheduler::objectDetectionConnected);
+    connect(object_detection, &ObjectDetectionHandler::personDetected, scheduler, &Scheduler::personDetected);
+    connect(object_detection, &ObjectDetectionHandler::personNotDetected, scheduler, &Scheduler::personNotDetected);
 
 
     // -------------------------- UI -----------------------------
@@ -125,8 +133,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     rightWidgetLayout->addWidget(tabWidget);
 
-    engine_output = new QPlainTextEdit();
-    engine_output->verticalScrollBar()->setStyleSheet(
+    stockfish_output = new QPlainTextEdit();
+    stockfish_output->verticalScrollBar()->setStyleSheet(
         "QScrollBar:vertical {"
         "    border: 2px solid #999999;"
         "    background: #f0f0f0;"
@@ -152,14 +160,14 @@ MainWindow::MainWindow(QWidget *parent)
         "    subcontrol-origin: margin;"
         "}"
        );
-    engine_output->setMinimumSize(400, 100);
-    engine_output->setStyleSheet("background-color: rgb(255, 255, 255);");
+    stockfish_output->setMinimumSize(400, 100);
+    stockfish_output->setStyleSheet("background-color: rgb(255, 255, 255);");
 
     // send commands to engine
-    InputTextBox *inputTextBox_send = new InputTextBox(this);
-    inputTextBox_send->setMinimumSize(400, 30);
-    inputTextBox_send->setMaximumHeight(30);
-    inputTextBox_send->setStyleSheet("background-color: rgb(255, 255, 255);");
+    itb_stockfish = new InputTextBox(this);
+    itb_stockfish->setMinimumSize(400, 30);
+    itb_stockfish->setMaximumHeight(30);
+    itb_stockfish->setStyleSheet("background-color: rgb(255, 255, 255);");
 
 //    // send an algebraic chess notation for the program to set
 //    InputTextBox *inputTextBox_send3 = new InputTextBox(this);
@@ -177,15 +185,15 @@ MainWindow::MainWindow(QWidget *parent)
     btn_connect_bluetooth->setText("Connect");
 
     // labels
-    QLabel *lbl_engine_output = new QLabel(rightWidget);
-    lbl_engine_output->setText("Engine output:");
+    QLabel *lbl_stockfish_output = new QLabel(rightWidget);
+    lbl_stockfish_output->setText("Engine output:");
 
     QLabel *lbl_eChessboard_output = new QLabel(rightWidget);
     lbl_eChessboard_output->setText("e-Chessboard output:");
 
-    tab1WidgetLayout->addWidget(lbl_engine_output);
-    tab1WidgetLayout->addWidget(engine_output);
-    tab1WidgetLayout->addWidget(inputTextBox_send);
+    tab1WidgetLayout->addWidget(lbl_stockfish_output);
+    tab1WidgetLayout->addWidget(stockfish_output);
+    tab1WidgetLayout->addWidget(itb_stockfish);
 
 //    rightWidgetLayout->addWidget(inputTextBox_send3);
 
@@ -212,16 +220,11 @@ MainWindow::MainWindow(QWidget *parent)
     tab3WidgetLayout->addWidget(lbl_object_detection_output);
     tab3WidgetLayout->addWidget(object_detection_output);
 
-    ObjectDetectionHandler *object_detection = new ObjectDetectionHandler(this);
-
     object_detection->setPath("/home/adam/Desktop/object_detection/human_detection.py");
 
     connect(btn_start_object_detection, &QPushButton::pressed, object_detection, &ObjectDetectionHandler::start);
     connect(btn_stop_object_detection, &QPushButton::pressed, object_detection, &ObjectDetectionHandler::stop);
     connect(object_detection, &ObjectDetectionHandler::output, this, &MainWindow::objectDetectionOutput);
-
-    connect(object_detection, &ObjectDetectionHandler::object_detection_started, this, &MainWindow::object_detection_started);
-    connect(object_detection, &ObjectDetectionHandler::object_detection_stopped, this, &MainWindow::object_detection_stopped);
 
     // connecting the robot communication script
     QPushButton *btn_start_robot_communication = new QPushButton(this);
@@ -233,11 +236,11 @@ MainWindow::MainWindow(QWidget *parent)
     QLabel *lbl_robot_communication_output = new QLabel(rightWidget);
     lbl_robot_communication_output->setText("Robot communication:");
 
-    robot_communication_output = new QPlainTextEdit(this);
+    robot_communication_output = new QPlainTextEdit();
     robot_communication_output->setMinimumSize(400, 100);
     robot_communication_output->setStyleSheet("background-color: rgb(255, 255, 255);");
 
-    InputTextBox *itb_robot_communication = new InputTextBox(this);
+    itb_robot_communication = new InputTextBox();
     itb_robot_communication->setMinimumSize(400, 30);
     itb_robot_communication->setMaximumHeight(30);
     itb_robot_communication->setStyleSheet("background-color: rgb(255, 255, 255);");
@@ -248,16 +251,14 @@ MainWindow::MainWindow(QWidget *parent)
     tab4WidgetLayout->addWidget(robot_communication_output);
     tab4WidgetLayout->addWidget(itb_robot_communication);
 
-    RobotCommunicationHandler *robot_communication = new RobotCommunicationHandler(this);
+
 
     robot_communication->setPath("/home/adam/Desktop/robot-control/build/robot-control");
 
     connect(btn_start_robot_communication, &QPushButton::pressed, robot_communication, &RobotCommunicationHandler::start);
     connect(btn_stop_robot_communication, &QPushButton::pressed, robot_communication, &RobotCommunicationHandler::stop);
     connect(robot_communication, &RobotCommunicationHandler::output, this, &MainWindow::robotCommunicationOutput);
-    connect(itb_robot_communication, &InputTextBox::enterPressed, robot_communication, [robot_communication, itb_robot_communication](){robot_communication->send(itb_robot_communication->toPlainText().toUtf8());});
-
-    SerialPortHandler *serial_port = new SerialPortHandler();
+    connect(itb_robot_communication, &InputTextBox::enterPressed, robot_communication, &RobotCommunicationHandler::send);
 
     tab5WidgetLayout->addWidget(serial_port);
 
@@ -269,23 +270,23 @@ MainWindow::MainWindow(QWidget *parent)
 
     // signals
     connect(stockfish, &Stockfish::output, this, &MainWindow::output);
-    connect(inputTextBox_send, &InputTextBox::enterPressed, stockfish, [stockfish, inputTextBox_send](){stockfish->send(inputTextBox_send->toPlainText().toUtf8());});
+    connect(itb_stockfish, &InputTextBox::enterPressed, stockfish, &Stockfish::send);
 
     connect(chessboard, &Chessboard::resizeEvalBar, evaluationBar, &EvaluationBar::resizeEvalBar);
 
     // bluetooth handling
-    BluetoothConnectionHandler *connection = new BluetoothConnectionHandler();
+
 //    connection->startDeviceDiscovery();
 
-    connect(connection, &BluetoothConnectionHandler::dataReceived, this, &MainWindow::eChessboardOutput);
+    connect(eChessboard_connection, &BluetoothConnectionHandler::dataReceived, this, &MainWindow::eChessboardOutput);
 
-    connect(btn_connect_bluetooth, &QPushButton::pressed, connection, &BluetoothConnectionHandler::startDeviceDiscovery);
-
-
+    connect(btn_connect_bluetooth, &QPushButton::pressed, eChessboard_connection, &BluetoothConnectionHandler::startDeviceDiscovery);
 
 
 
-    connect(connection, &BluetoothConnectionHandler::dataReceived, chess_game, &ChessGame::getChessboardOutput);
+
+
+    connect(eChessboard_connection, &BluetoothConnectionHandler::dataReceived, chess_game, &ChessGame::getChessboardOutput);
 
 //    connect(inputTextBox_send3, &InputTextBox::enterPressed, this, [this, chessboard, chess_game, inputTextBox_send3]() {setChessPosition(chessboard, chess_game, inputTextBox_send3->toPlainText().toUtf8());});
 
@@ -328,17 +329,9 @@ MainWindow::~MainWindow()
 
 void MainWindow::output(QString data)
 {
-    engine_output->appendPlainText(data);
+    stockfish_output->appendPlainText(data);
 
-    if (data.contains("bestmove")) {
 
-        int bestmove_last_idx = data.indexOf("bestmove ") + strlen("bestmove ");
-        int ponder_idx = data.indexOf("ponder");
-
-        QString best_move = data.mid(bestmove_last_idx, ponder_idx - 1 - bestmove_last_idx);
-
-        emit bestMoveFound(best_move);
-    }
 
     emit updateEvalBar(data, whoseTurn);
 }
@@ -392,18 +385,6 @@ void MainWindow::initiateReset()
 void MainWindow::getWhoseTurnInfo(bool turnInfo)
 {
     whoseTurn = turnInfo;
-}
-
-void MainWindow::object_detection_started()
-{
-//    frame_object_detection_status->setStyleSheet("background-color: rgb(0, 255, 0);");
-    qDebug() << "this happened";
-}
-
-void MainWindow::object_detection_stopped()
-{
-//    frame_object_detection_status->setStyleSheet("background-color: rgb(255, 0, 0);");
-    qDebug() << "this happened2";
 }
 
 //void MainWindow::btn_forwards_pressed()

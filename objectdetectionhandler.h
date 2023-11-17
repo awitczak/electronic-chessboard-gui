@@ -17,9 +17,9 @@ public:
 
 signals:
     void output(QString data);
-
-    void object_detection_started();
-    void object_detection_stopped();
+    void personDetected();
+    void personNotDetected();
+    void connected();
 
 public slots:
     void start();
@@ -38,6 +38,8 @@ private:
     QProcess m_process;
     QString m_path;
     bool m_listening;
+
+    void processData(QString data);
 };
 
 #endif // OBJECTDETECTIONHANDLER_H

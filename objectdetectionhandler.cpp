@@ -36,7 +36,7 @@ void ObjectDetectionHandler::stop()
 {
     m_process.terminate();
 
-    emit object_detection_stopped();
+//    emit object_detection_stopped();
 }
 
 void ObjectDetectionHandler::errorOccurred(QProcess::ProcessError error)
@@ -53,9 +53,11 @@ void ObjectDetectionHandler::finished(int exitCode, QProcess::ExitStatus exitSta
 void ObjectDetectionHandler::readyReadStandardError()
 {
     QByteArray data = m_process.readAllStandardError();
-    qDebug() << "Standard Error: " << data;
+//    qDebug() << "Standard Error: " << data;
 
     emit output(data);
+
+    processData(data);
 }
 
 void ObjectDetectionHandler::readyReadStandardOutput()
@@ -65,17 +67,23 @@ void ObjectDetectionHandler::readyReadStandardOutput()
 
 void ObjectDetectionHandler::started()
 {
-    qDebug() << "3";
+    emit connected();
 }
 
 void ObjectDetectionHandler::stateChanged(QProcess::ProcessState newState)
 {
-    if (newState == QProcess::Running) {
-        emit object_detection_started();
-    }
+//    if (newState == QProcess::Running) {
+//        emit object_detection_started();
+//    }
 }
 
 void ObjectDetectionHandler::readyRead()
 {
     qDebug() << "5";
+}
+
+void ObjectDetectionHandler::processData(QString data)
+{
+    if (data.contains("person")) emit personDetected();
+    else personNotDetected();
 }

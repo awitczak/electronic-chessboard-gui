@@ -9,8 +9,7 @@ void InputTextBox::keyPressEvent(QKeyEvent *event)
 {
     switch (event->key()) {
     case Qt::Key_Enter:
-        emit enterPressed();
-        emit getData(toPlainText().toLocal8Bit());
+        emit enterPressed(toPlainText().toLocal8Bit());
 
         clear();
 
@@ -18,8 +17,7 @@ void InputTextBox::keyPressEvent(QKeyEvent *event)
 
         break;
     case Qt::Key_Return:
-        emit enterPressed();
-        emit getData(toPlainText().toLocal8Bit());
+        emit enterPressed(toPlainText().toLocal8Bit());
 
         clear();
 

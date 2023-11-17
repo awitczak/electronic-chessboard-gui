@@ -52,9 +52,6 @@ private slots:
     void initiateReset();
     void getWhoseTurnInfo(bool turnInfo);
 
-    void object_detection_started();
-    void object_detection_stopped();
-
     // buttons
 //    void btn_forwards_pressed();
 //    void btn_backwards_pressed();
@@ -67,14 +64,16 @@ protected:
 private:
     Ui::MainWindow *ui;
 
+    InputTextBox *itb_stockfish = nullptr;
     InputTextBox *itb_robot_communication = nullptr;
 
-    QPlainTextEdit *engine_output = nullptr;
+    QPlainTextEdit *stockfish_output = nullptr;
     QPlainTextEdit *eChessboard_output = nullptr;
     QPlainTextEdit *object_detection_output = nullptr;
     QPlainTextEdit *robot_communication_output = nullptr;
 
     Scheduler *scheduler = nullptr;
+    BluetoothConnectionHandler *eChessboard_connection = nullptr;
     Stockfish *stockfish = nullptr;
     Chessboard *chessboard = nullptr;
     ChessGame *chess_game = nullptr;

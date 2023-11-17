@@ -147,3 +147,45 @@ void Stockfish::startStockfish()
 
     emit connected();
 }
+
+void Stockfish::getCurrentBestMove(QString data)
+{
+    if (data.contains("bestmove")) {
+
+        int bestMove_last_idx = data.indexOf("bestmove ") + strlen("bestmove ");
+        int ponder_idx = data.indexOf("ponder");
+
+        QString bestMove = data.mid(bestMove_last_idx, ponder_idx - 1 - bestMove_last_idx);
+
+        emit currentBestMove(bestMove);
+    }
+}
+
+void Stockfish::getCurrentEval(QString data)
+{
+    static float currentEval;
+
+    std::string dataString = data.toStdString();
+    std::string line = "";
+    for (int i = 0; i < data.length(); i++) {
+        if (data[i] != '\n') {
+            line += dataString[i];
+        }
+        else {
+            QString qStringLine = QString::fromStdString(line);
+
+            int nodes_idx = qStringLine.indexOf("nodes");
+            int mate_idx = qStringLine.indexOf("mate");
+            int cp_idx = qStringLine.indexOf("cp");
+
+            if (mate_idx >= 0) {
+
+            }
+
+            if (cp_idx >= 0) {
+                currentEval = qStringLine.mid(cp_idx + 3, nodes_idx - cp_idx - 4).toFloat();
+            }
+            line = "";
+        }
+    }
+}

@@ -15,6 +15,40 @@ public:
 
 public slots:
     void stockfishConnected();
+    void stockfishNotConnected();
+    void stockfishReady();
+    void stockfishBusy();
+    void stockfishFault();
+
+    void objectDetectionConnected();
+    void objectDetectionDisconnected();
+    void personDetected();
+    void personNotDetected();
+
+    void eChessboardConnected();
+    void eChessboardDisconnected();
+    void eChessboardReady();
+    void eChessboardBusy();
+    void eChessboardFault();
+    void eChessboardNewMoveMade();
+
+    void robotComConnected();
+    void robotComDisconnected();
+    void robotComReady();
+    void robotComBusy();
+    void robotComFault();
+
+    void gripperConnected();
+    void gripperDisconnected();
+    void gripperReady();
+    void gripperBusy();
+    void gripperFault();
+
+    void chessgameStart();
+    void chessgameWhiteMove();
+    void chessgameBlackMove();
+    void chessgameEnd();
+
 
 private:
 

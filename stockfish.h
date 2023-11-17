@@ -18,6 +18,8 @@ public:
 signals:
     void connected();
     void output(QString data);
+    void currentEvaluation(QString eval);
+    void currentBestMove(QString bestMove);
 
 public slots:
     void start();
@@ -42,6 +44,9 @@ private:
 
     QString getProcess();
     void startStockfish();
+
+    void getCurrentBestMove(QString data);
+    void getCurrentEval(QString data);
 };
 
 #endif // STOCKFISH_H

@@ -14,8 +14,7 @@ protected:
     void keyPressEvent(QKeyEvent *event) override;
 
 signals:
-    void enterPressed();
-    void getData(const QByteArray &data);
+    void enterPressed(const QByteArray &data);
 };
 
 #endif // INPUTTEXTBOX_H
