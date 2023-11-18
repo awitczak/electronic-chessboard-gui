@@ -100,9 +100,11 @@ void BluetoothConnectionHandler::onConnected()
     sendCommand("RESET");
 
     emit boardReset();
+    emit connected();
 }
 
 void BluetoothConnectionHandler::onDisconnected()
 {
     qDebug() << "Disconnected from Bluetooth device!";
+    emit disconnected();
 }

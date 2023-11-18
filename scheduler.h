@@ -5,6 +5,50 @@
 #include <QThread>
 #include <QDebug>
 
+typedef enum {
+    IDLE = 0,
+    SETUP,
+    GAME,
+    FINISHED
+
+} State;
+
+typedef struct {
+    bool stateMsg;
+    bool isFinished;
+} schedulerFlags;
+
+typedef struct {
+    bool connected;
+
+} stockfishFlags;
+
+typedef struct {
+    bool connected;
+
+} eChessboardFlags;
+
+typedef struct {
+    bool started;
+    bool finished;
+
+} chessgameFlags;
+
+typedef struct {
+    bool connected;
+
+} objectDetectionFlags;
+
+typedef struct {
+    bool connected;
+
+} gripperFlags;
+
+typedef struct {
+    bool connected;
+
+} robotCommunicationFlags;
+
 class Scheduler : public QThread {
     Q_OBJECT
 
@@ -15,7 +59,7 @@ public:
 
 public slots:
     void stockfishConnected();
-    void stockfishNotConnected();
+    void stockfishDisconnected();
     void stockfishReady();
     void stockfishBusy();
     void stockfishFault();
@@ -52,17 +96,19 @@ public slots:
 
 private:
 
-    typedef enum {
-        IDLE = 0,
-        WAIT_FOR_STOCKFISH,
-        STOCKFISH_CONNECTED
-    } State;
-
     State state;
 
-    bool isFinished;
+    schedulerFlags f_scheduler;
+    stockfishFlags f_stockfish;
+    eChessboardFlags f_eChessboard;
+    chessgameFlags f_chessgame;
+    objectDetectionFlags f_detection;
+    gripperFlags f_gripper;
+    robotCommunicationFlags f_robotCom;
 
     void mainLoop();
+    void initFlags();
+    void schedulerMsg(QString msg);
 
 };
 

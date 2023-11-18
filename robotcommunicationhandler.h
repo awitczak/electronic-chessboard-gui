@@ -16,6 +16,8 @@ public:
 
 signals:
     void output(QString data);
+    void connected();
+    void disconnected();
 
 public slots:
     void start();

@@ -36,6 +36,8 @@ void RobotCommunicationHandler::stop()
     send("exit");
     m_process.terminate();
     m_listening = false;
+
+    emit disconnected();
 }
 
 void RobotCommunicationHandler::send(QByteArray cmd)
@@ -125,4 +127,6 @@ void RobotCommunicationHandler::startRobotComm()
     else command.append("\n");
 
     m_process.write(command);
+
+    emit connected();
 }

@@ -42,6 +42,8 @@ public:
     ~SerialPortHandler();
 
 signals:
+    void connected();
+    void disconnected();
 
 private slots:
     // settings dialog

@@ -11,8 +11,6 @@ class EvaluationBar : public QWidget
 public:
     explicit EvaluationBar(QWidget *parent = nullptr);
 
-    void setEvalValue(float value);
-
 protected:
     void paintEvent(QPaintEvent *event) override;
     void resizeEvent(QResizeEvent *event) override;
@@ -20,7 +18,12 @@ protected:
 
 private:
     float currentEvalValue;
+    int currentMateN;
     int currentHeight;
+
+    bool mateFound;
+    bool whiteTurn;
+    bool blackTurn;
 
     void setCurrentHeight(int height);
     int mapFloatToIntRange(float value, float inputMin, float inputMax, int outputMin, int outputMax);
@@ -28,8 +31,12 @@ private:
 signals:
 
 public slots:
+    void mateEvaluated(int mate_N);
+    void setEvalValue(float eval);
+    void flipTurns();
+
     void resizeEvalBar(int height);
-    void updateEvalBar(QString eval, bool whoseTurn);
+    void updateEvalBar(float eval);
     void resetEvalBar();
 };
 

@@ -3,9 +3,21 @@
 
 Scheduler::Scheduler()
 {
-    isFinished = false;
-    state = IDLE;
-    qDebug() << "Scheduler initialized!";
+    f_scheduler.isFinished = false;
+    f_scheduler.stateMsg = false;
+
+    f_stockfish.connected = false;
+
+    f_eChessboard.connected = false;
+
+    f_detection.connected = false;
+
+    f_gripper.connected = false;
+
+    f_robotCom.connected = false;
+
+    state = SETUP;
+    schedulerMsg("Scheduler initialized!");
 
     start();
 }
@@ -13,18 +25,18 @@ Scheduler::Scheduler()
 void Scheduler::run()
 {
     mainLoop();
-
-    qDebug() << "Scheduler finished operation!";
 }
 
 void Scheduler::stockfishConnected()
 {
-    qDebug() << "Stockfish connected!";
+    schedulerMsg("Stockfish connected!");
+    f_stockfish.connected = true;
 }
 
-void Scheduler::stockfishNotConnected()
+void Scheduler::stockfishDisconnected()
 {
-
+    schedulerMsg("Stockfish disconnected!");
+    f_stockfish.connected = false;
 }
 
 void Scheduler::stockfishReady()
@@ -44,12 +56,14 @@ void Scheduler::stockfishFault()
 
 void Scheduler::objectDetectionConnected()
 {
-    qDebug() << "Object detection script connected!";
+    schedulerMsg("Object detection script connected!");
+    f_detection.connected = true;
 }
 
 void Scheduler::objectDetectionDisconnected()
 {
-
+    schedulerMsg("Object detection script disconnected!");
+    f_detection.connected = false;
 }
 
 void Scheduler::personDetected()
@@ -64,12 +78,14 @@ void Scheduler::personNotDetected()
 
 void Scheduler::eChessboardConnected()
 {
-
+    schedulerMsg("eChessboard connected!");
+    f_eChessboard.connected = true;
 }
 
 void Scheduler::eChessboardDisconnected()
 {
-
+    schedulerMsg("eChessboard connected!");
+    f_eChessboard.connected = false;
 }
 
 void Scheduler::eChessboardReady()
@@ -94,12 +110,14 @@ void Scheduler::eChessboardNewMoveMade()
 
 void Scheduler::robotComConnected()
 {
-
+    schedulerMsg("robotCom connected!");
+    f_robotCom.connected = true;
 }
 
 void Scheduler::robotComDisconnected()
 {
-
+    schedulerMsg("robotCom disconnected!");
+    f_robotCom.connected = false;
 }
 
 void Scheduler::robotComReady()
@@ -119,12 +137,14 @@ void Scheduler::robotComFault()
 
 void Scheduler::gripperConnected()
 {
-
+    schedulerMsg("Gripper connected!");
+    f_gripper.connected = true;
 }
 
 void Scheduler::gripperDisconnected()
 {
-
+    schedulerMsg("Gripper connected!");
+    f_gripper.connected = false;
 }
 
 void Scheduler::gripperReady()
@@ -164,23 +184,52 @@ void Scheduler::chessgameEnd()
 
 void Scheduler::mainLoop()
 {
-    while (!isFinished) {
+    while (!f_scheduler.isFinished) {
 
-//        switch (state) {
-//        case IDLE:
-//            qDebug() << "IDLE!";
-//            state = WAIT_FOR_STOCKFISH;
-//            break;
-//        case WAIT_FOR_STOCKFISH:
-//            qDebug() << "WAIT_FOR_STOCKFISH!";
-//            break;
-//        case STOCKFISH_CONNECTED:
-//            qDebug() << "STOCKFISH_CONNECTED!";
-//            isFinished = true;
-//            break;
-//        }
+        switch (state) {
+        case IDLE:
+            if (!f_scheduler.stateMsg) {
+                schedulerMsg("IDLE!");
+                f_scheduler.stateMsg = true;
+            }
+
+            // do nothing
+            break;
+        case SETUP:
+            if (!f_scheduler.stateMsg) {
+                schedulerMsg("SETUP!");
+                f_scheduler.stateMsg = true;
+            }
+
+            if (f_stockfish.connected && f_eChessboard.connected && f_detection.connected && f_gripper.connected && f_robotCom.connected) {
+                schedulerMsg("Setup done!");
+                state = GAME;
+            }
+
+        case GAME:
+            if (!f_scheduler.stateMsg) {
+                schedulerMsg("GAME!");
+                f_scheduler.stateMsg = true;
+            }
+
+            break;
+
+        case FINISHED:
+            break;
+
+        default:
+
+            break;
+        }
 
 
-        sleep(3);
+        msleep(250);
     }
+
+    schedulerMsg("Scheduler finished!");
+}
+
+void Scheduler::schedulerMsg(QString msg)
+{
+    qDebug() << "SCH>> " << msg;
 }

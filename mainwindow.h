@@ -39,7 +39,6 @@ public:
     void startDeviceDiscovery();
 
 signals:
-    void updateEvalBar(QString eval, bool whoseTurn);
     void bestMoveFound(QString best_move);
     void reset();
 
@@ -50,7 +49,6 @@ private slots:
     void objectDetectionOutput(QString data);
     void setChessPosition(Chessboard* chessboard, ChessGame* chess_game, const QByteArray &data);
     void initiateReset();
-    void getWhoseTurnInfo(bool turnInfo);
 
     // buttons
 //    void btn_forwards_pressed();
@@ -73,15 +71,13 @@ private:
     QPlainTextEdit *robot_communication_output = nullptr;
 
     Scheduler *scheduler = nullptr;
-    BluetoothConnectionHandler *eChessboard_connection = nullptr;
+    BluetoothConnectionHandler *eChessboard = nullptr;
     Stockfish *stockfish = nullptr;
     Chessboard *chessboard = nullptr;
     ChessGame *chess_game = nullptr;
     ObjectDetectionHandler *object_detection = nullptr;
     RobotCommunicationHandler *robot_communication = nullptr;
     SerialPortHandler *serial_port = nullptr;
-
-    bool whoseTurn = true;
 
     // adding buttons
     QPushButton *btn_forwards = nullptr;

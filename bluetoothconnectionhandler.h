@@ -18,6 +18,8 @@ public:
 signals:
     void dataReceived(const QByteArray &data);
     void boardReset();
+    void connected();
+    void disconnected();
 
 private slots:
     void onDeviceDiscovered(const QBluetoothDeviceInfo &deviceInfo);

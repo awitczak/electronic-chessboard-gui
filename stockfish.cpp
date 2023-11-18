@@ -35,6 +35,8 @@ void Stockfish::stop()
 {
     m_listening = false;
     m_process.close();
+
+    emit disconnected();
 }
 
 void Stockfish::send(QByteArray cmd)
@@ -126,6 +128,8 @@ void Stockfish::readyRead()
     QByteArray data = m_process.readAll().trimmed();
 
     emit output(data);
+
+    getCurrentEval(data);
 }
 
 QString Stockfish::getProcess()
@@ -164,6 +168,7 @@ void Stockfish::getCurrentBestMove(QString data)
 void Stockfish::getCurrentEval(QString data)
 {
     static float currentEval;
+    static int mateEval;
 
     std::string dataString = data.toStdString();
     std::string line = "";
@@ -179,11 +184,15 @@ void Stockfish::getCurrentEval(QString data)
             int cp_idx = qStringLine.indexOf("cp");
 
             if (mate_idx >= 0) {
+                mateEval = qStringLine.mid(mate_idx + 5, nodes_idx - mate_idx - 6).toInt();
 
+                emit mateEvaluated(mateEval);
             }
 
             if (cp_idx >= 0) {
                 currentEval = qStringLine.mid(cp_idx + 3, nodes_idx - cp_idx - 4).toFloat();
+
+                emit currentEvaluation(currentEval);
             }
             line = "";
         }

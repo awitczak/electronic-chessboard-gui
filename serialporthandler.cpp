@@ -146,6 +146,7 @@ void SerialPortHandler::open()
         showStatusMessage(tr("Connected to %1 : %2, %3, %4, %5, %6")
                               .arg(p.name, p.stringBaudRate, p.stringDataBits,
                                    p.stringParity, p.stringStopBits, p.stringFlowControl));
+        emit connected();
     } else {
         QMessageBox::critical(this, tr("Error"), m_serialPort->errorString());
 
@@ -161,6 +162,8 @@ void SerialPortHandler::close()
 //    m_ui->actionDisconnect->setEnabled(false);
 //    m_ui->actionConfigure->setEnabled(true);
     showStatusMessage(tr("Disconnected"));
+
+    emit disconnected();
 }
 
 void SerialPortHandler::send()

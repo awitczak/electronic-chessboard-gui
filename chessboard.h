@@ -46,6 +46,7 @@ protected:
 
 signals:
     void resizeEvalBar(int height);
+
 };
 
 #endif // CHESSBOARD_H

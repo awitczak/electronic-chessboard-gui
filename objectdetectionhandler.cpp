@@ -36,6 +36,8 @@ void ObjectDetectionHandler::stop()
 {
     m_process.terminate();
 
+    emit disconnected();
+
 //    emit object_detection_stopped();
 }
 

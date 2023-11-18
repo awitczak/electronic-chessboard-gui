@@ -17,8 +17,10 @@ public:
 
 signals:
     void connected();
+    void disconnected();
     void output(QString data);
-    void currentEvaluation(QString eval);
+    void currentEvaluation(float eval);
+    void mateEvaluated(int mate_N);
     void currentBestMove(QString bestMove);
 
 public slots:

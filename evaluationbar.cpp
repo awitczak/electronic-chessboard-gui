@@ -6,12 +6,21 @@ EvaluationBar::EvaluationBar(QWidget *parent)
     setFixedWidth(30);
     setMinimumHeight(800);
     setEvalValue(0.0);
+
+    mateFound = false;
+    whiteTurn = true;
+    blackTurn = false;
 }
 
-void EvaluationBar::setEvalValue(float value)
+void EvaluationBar::setEvalValue(float eval)
 {
-    currentEvalValue = value;
-    update();
+    currentEvalValue = eval;
+}
+
+void EvaluationBar::flipTurns()
+{
+    whiteTurn = !whiteTurn;
+    blackTurn = !blackTurn;
 }
 
 void EvaluationBar::paintEvent(QPaintEvent *event)
@@ -19,6 +28,17 @@ void EvaluationBar::paintEvent(QPaintEvent *event)
     Q_UNUSED(event);
 
     int value = mapFloatToIntRange(currentEvalValue, -50.0, 50.0, 0, 100);
+
+    qDebug() << value << mateFound;
+
+    if (mateFound) {
+        if (value >= 0) {
+            value = 100;
+        }
+        else {
+            value = 0;
+        }
+    }
 
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing, true);
@@ -35,12 +55,14 @@ void EvaluationBar::paintEvent(QPaintEvent *event)
         painter.setPen(Qt::black);
         painter.setFont(QFont("Arial", 9));
         QString evalText = QString::number(currentEvalValue, 'f', 2);
+        if (mateFound) evalText = "M" + QString::number(currentMateN);
         painter.drawText(rect(), Qt::AlignHCenter | Qt::AlignBottom, evalText);
     }
     else {
         painter.setPen(Qt::white);
         painter.setFont(QFont("Arial", 9));
         QString evalText = QString::number(currentEvalValue, 'f', 2);
+        if (mateFound) evalText = "M" + QString::number(currentMateN);
         painter.drawText(rect(), Qt::AlignHCenter | Qt::AlignTop, evalText);
     }
 }
@@ -81,49 +103,44 @@ int EvaluationBar::mapFloatToIntRange(float value, float inputMin, float inputMa
     return outputValue;
 }
 
+void EvaluationBar::mateEvaluated(int mate_N)
+{
+    mateFound = true;
+    currentMateN = mate_N;
+
+    if (whiteTurn) {
+        setEvalValue(100);
+    }
+
+    if (blackTurn) {
+        setEvalValue(-100);
+    }
+
+    update();
+}
+
 void EvaluationBar::resizeEvalBar(int height)
 {
     setCurrentHeight(height);
 }
 
-void EvaluationBar::updateEvalBar(QString eval, bool whoseTurn)
+void EvaluationBar::updateEvalBar(float eval)
 {
-    std::string dataString = eval.toStdString();
+    mateFound = false;
 
-    static float newEvalValue;
-
-    std::string line = "";
-    for (int i = 0; i < eval.length(); i++) {
-        if (eval[i] != '\n') {
-            line += dataString[i];
-        }
-        else {
-            QString qStringLine = QString::fromStdString(line);
-
-            int nodes_idx = qStringLine.indexOf("nodes");
-            int mate_idx = qStringLine.indexOf("mate");
-            int cp_idx = qStringLine.indexOf("cp");
-
-            if (mate_idx >= 0) {
-
-            }
-
-            if (cp_idx >= 0) {
-                newEvalValue = qStringLine.mid(cp_idx + 3, nodes_idx - cp_idx - 4).toInt();
-            }
-            line = "";
-        }
+    if (whiteTurn) {
+        setEvalValue(eval/100);
     }
 
-    if (!whoseTurn) {
-        setEvalValue(newEvalValue/100 * -1);
+    if (blackTurn) {
+        setEvalValue(eval/100 * -1);
     }
-    else {
-        setEvalValue(newEvalValue/100);
-    }
+
+    update();
 }
 
 void EvaluationBar::resetEvalBar()
 {
     setEvalValue(0.0);
+    mateFound = false;
 }

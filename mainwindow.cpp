@@ -11,16 +11,33 @@ MainWindow::MainWindow(QWidget *parent)
 
     stockfish = new Stockfish();
     chess_game = new ChessGame();
-    eChessboard_connection = new BluetoothConnectionHandler();
+    eChessboard = new BluetoothConnectionHandler();
     robot_communication = new RobotCommunicationHandler();
     object_detection = new ObjectDetectionHandler();
     serial_port = new SerialPortHandler();
 
-    // connecting features to the scheduler
-    connect(stockfish, &Stockfish::connected, scheduler, &Scheduler::stockfishConnected);
-    connect(object_detection, &ObjectDetectionHandler::connected, scheduler, &Scheduler::objectDetectionConnected);
+    // connecting stockfish
+    connect(scheduler, &Scheduler::stockfishConnected, stockfish, &Stockfish::connected);
+    connect(scheduler, &Scheduler::stockfishDisconnected, stockfish, &Stockfish::disconnected);
+
+    // connecting eChessboard
+    connect(scheduler, &Scheduler::eChessboardConnected, eChessboard, &BluetoothConnectionHandler::connected);
+    connect(scheduler, &Scheduler::eChessboardDisconnected, eChessboard, &BluetoothConnectionHandler::disconnected);
+
+    // connecting object_detection
+    connect(scheduler, &Scheduler::objectDetectionConnected, object_detection, &ObjectDetectionHandler::connected);
+    connect(scheduler, &Scheduler::objectDetectionDisconnected, object_detection, &ObjectDetectionHandler::disconnected);
     connect(object_detection, &ObjectDetectionHandler::personDetected, scheduler, &Scheduler::personDetected);
     connect(object_detection, &ObjectDetectionHandler::personNotDetected, scheduler, &Scheduler::personNotDetected);
+
+    // connecting gripper
+    connect(scheduler, &Scheduler::gripperConnected, serial_port, &SerialPortHandler::connected);
+    connect(scheduler, &Scheduler::gripperDisconnected, serial_port, &SerialPortHandler::disconnected);
+
+    // connecting robotCom
+    connect(scheduler, &Scheduler::robotComConnected, robot_communication, &RobotCommunicationHandler::connected);
+    connect(scheduler, &Scheduler::robotComDisconnected, robot_communication, &RobotCommunicationHandler::disconnected);
+
 
 
     // -------------------------- UI -----------------------------
@@ -278,19 +295,20 @@ MainWindow::MainWindow(QWidget *parent)
 
 //    connection->startDeviceDiscovery();
 
-    connect(eChessboard_connection, &BluetoothConnectionHandler::dataReceived, this, &MainWindow::eChessboardOutput);
+    connect(eChessboard, &BluetoothConnectionHandler::dataReceived, this, &MainWindow::eChessboardOutput);
 
-    connect(btn_connect_bluetooth, &QPushButton::pressed, eChessboard_connection, &BluetoothConnectionHandler::startDeviceDiscovery);
-
-
+    connect(btn_connect_bluetooth, &QPushButton::pressed, eChessboard, &BluetoothConnectionHandler::startDeviceDiscovery);
 
 
 
-    connect(eChessboard_connection, &BluetoothConnectionHandler::dataReceived, chess_game, &ChessGame::getChessboardOutput);
+
+
+    connect(eChessboard, &BluetoothConnectionHandler::dataReceived, chess_game, &ChessGame::getChessboardOutput);
 
 //    connect(inputTextBox_send3, &InputTextBox::enterPressed, this, [this, chessboard, chess_game, inputTextBox_send3]() {setChessPosition(chessboard, chess_game, inputTextBox_send3->toPlainText().toUtf8());});
 
-    connect(this, &MainWindow::updateEvalBar, evaluationBar, &EvaluationBar::updateEvalBar);
+    connect(stockfish, &Stockfish::mateEvaluated, evaluationBar, &EvaluationBar::mateEvaluated);
+    connect(stockfish, &Stockfish::currentEvaluation, evaluationBar, &EvaluationBar::updateEvalBar);
 
     connect(chess_game, &ChessGame::boardStateChanged, chessboard, &Chessboard::updateChessboard);
 
@@ -298,7 +316,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(chess_game, &ChessGame::sendFENtoStockfish, stockfish, &Stockfish::updateFEN);
 
-    connect(chess_game, &ChessGame::whoseTurnInfo, this, &MainWindow::getWhoseTurnInfo);
+    connect(chess_game, &ChessGame::whoseTurnInfo, evaluationBar, &EvaluationBar::flipTurns);
 
     // reset chessboard gui, chess game info and stockfish
     connect(this, &MainWindow::reset, chessboard, &Chessboard::resetChessboard);
@@ -330,10 +348,6 @@ MainWindow::~MainWindow()
 void MainWindow::output(QString data)
 {
     stockfish_output->appendPlainText(data);
-
-
-
-    emit updateEvalBar(data, whoseTurn);
 }
 
 void MainWindow::eChessboardOutput(const QByteArray &data)
@@ -377,14 +391,7 @@ void MainWindow::setChessPosition(Chessboard *chessboard, ChessGame *chess_game,
 
 void MainWindow::initiateReset()
 {
-    whoseTurn = true;
-
     emit reset();
-}
-
-void MainWindow::getWhoseTurnInfo(bool turnInfo)
-{
-    whoseTurn = turnInfo;
 }
 
 //void MainWindow::btn_forwards_pressed()

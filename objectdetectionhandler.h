@@ -20,6 +20,7 @@ signals:
     void personDetected();
     void personNotDetected();
     void connected();
+    void disconnected();
 
 public slots:
     void start();
