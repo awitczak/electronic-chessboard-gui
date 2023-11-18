@@ -50,6 +50,13 @@ private slots:
     void setChessPosition(Chessboard* chessboard, ChessGame* chess_game, const QByteArray &data);
     void initiateReset();
 
+    void btn_positiveX_pressed();
+    void btn_negativeX_pressed();
+    void btn_positiveY_pressed();
+    void btn_negativeY_pressed();
+    void btn_positiveZ_pressed();
+    void btn_negativeZ_pressed();
+
     // buttons
 //    void btn_forwards_pressed();
 //    void btn_backwards_pressed();
@@ -84,5 +91,7 @@ private:
     QPushButton *btn_backwards = nullptr;
     QPushButton *btn_start = nullptr;
     QPushButton *btn_end = nullptr;
+
+    QComboBox *cb_distances = nullptr;
 };
 #endif // MAINWINDOW_H

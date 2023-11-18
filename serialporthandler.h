@@ -45,6 +45,9 @@ signals:
     void connected();
     void disconnected();
 
+public slots:
+    void send(QString cmd);
+
 private slots:
     // settings dialog
     void showPortInfo(int idx);
@@ -55,7 +58,6 @@ private slots:
     // serial port handler
     void open();
     void close();
-    void send();
     void writeData(const QByteArray &data);
     void readData();
 

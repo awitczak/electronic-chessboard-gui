@@ -17,26 +17,27 @@ MainWindow::MainWindow(QWidget *parent)
     serial_port = new SerialPortHandler();
 
     // connecting stockfish
-    connect(scheduler, &Scheduler::stockfishConnected, stockfish, &Stockfish::connected);
-    connect(scheduler, &Scheduler::stockfishDisconnected, stockfish, &Stockfish::disconnected);
+    connect(stockfish, &Stockfish::connected, scheduler, &Scheduler::stockfishConnected);
+    connect(stockfish, &Stockfish::disconnected, scheduler, &Scheduler::stockfishDisconnected);
 
     // connecting eChessboard
-    connect(scheduler, &Scheduler::eChessboardConnected, eChessboard, &BluetoothConnectionHandler::connected);
+    connect(eChessboard, &BluetoothConnectionHandler::connected, scheduler, &Scheduler::eChessboardConnected);
     connect(scheduler, &Scheduler::eChessboardDisconnected, eChessboard, &BluetoothConnectionHandler::disconnected);
 
     // connecting object_detection
-    connect(scheduler, &Scheduler::objectDetectionConnected, object_detection, &ObjectDetectionHandler::connected);
-    connect(scheduler, &Scheduler::objectDetectionDisconnected, object_detection, &ObjectDetectionHandler::disconnected);
+    connect(object_detection, &ObjectDetectionHandler::connected, scheduler, &Scheduler::objectDetectionConnected);
+    connect(object_detection, &ObjectDetectionHandler::disconnected, scheduler, &Scheduler::objectDetectionDisconnected);
     connect(object_detection, &ObjectDetectionHandler::personDetected, scheduler, &Scheduler::personDetected);
     connect(object_detection, &ObjectDetectionHandler::personNotDetected, scheduler, &Scheduler::personNotDetected);
 
     // connecting gripper
-    connect(scheduler, &Scheduler::gripperConnected, serial_port, &SerialPortHandler::connected);
-    connect(scheduler, &Scheduler::gripperDisconnected, serial_port, &SerialPortHandler::disconnected);
+    connect(serial_port, &SerialPortHandler::connected, scheduler, &Scheduler::gripperConnected);
+    connect(serial_port, &SerialPortHandler::disconnected, scheduler, &Scheduler::gripperDisconnected);
+    connect(scheduler, &Scheduler::sendGripperCommand, serial_port, &SerialPortHandler::send);
 
     // connecting robotCom
-    connect(scheduler, &Scheduler::robotComConnected, robot_communication, &RobotCommunicationHandler::connected);
-    connect(scheduler, &Scheduler::robotComDisconnected, robot_communication, &RobotCommunicationHandler::disconnected);
+    connect(robot_communication, &RobotCommunicationHandler::connected, scheduler, &Scheduler::robotComConnected);
+    connect(robot_communication, &RobotCommunicationHandler::disconnected, scheduler, &Scheduler::robotComDisconnected);
 
 
 
@@ -262,13 +263,47 @@ MainWindow::MainWindow(QWidget *parent)
     itb_robot_communication->setMaximumHeight(30);
     itb_robot_communication->setStyleSheet("background-color: rgb(255, 255, 255);");
 
+    // adding buttons
+    QWidget *controlPanel = new QWidget();
+    QHBoxLayout *controlPanelLayout = new QHBoxLayout(controlPanel);
+
+    QPushButton *btn_positiveX = new QPushButton();
+    QPushButton *btn_negativeX = new QPushButton();
+    QPushButton *btn_positiveY = new QPushButton();
+    QPushButton *btn_negativeY = new QPushButton();
+    QPushButton *btn_positiveZ = new QPushButton();
+    QPushButton *btn_negativeZ = new QPushButton();
+    cb_distances = new QComboBox();
+
+    btn_positiveX->setText("X+");
+    btn_negativeX->setText("X-");
+    btn_positiveY->setText("Y+");
+    btn_negativeY->setText("Y-");
+    btn_positiveZ->setText("Z+");
+    btn_negativeZ->setText("Z-");
+    cb_distances->addItems({QStringLiteral("0.1"), QStringLiteral("0.5"), QStringLiteral("1"), QStringLiteral("10")});
+
+    controlPanelLayout->addWidget(btn_negativeX);
+    controlPanelLayout->addWidget(btn_positiveX);
+    controlPanelLayout->addWidget(btn_negativeY);
+    controlPanelLayout->addWidget(btn_positiveY);
+    controlPanelLayout->addWidget(btn_negativeZ);
+    controlPanelLayout->addWidget(btn_positiveZ);
+    controlPanelLayout->addWidget(cb_distances);
+
+    connect(btn_positiveX, &QPushButton::pressed, this, &MainWindow::btn_positiveX_pressed);
+    connect(btn_negativeX, &QPushButton::pressed, this, &MainWindow::btn_negativeX_pressed);
+    connect(btn_positiveY, &QPushButton::pressed, this, &MainWindow::btn_positiveY_pressed);
+    connect(btn_negativeY, &QPushButton::pressed, this, &MainWindow::btn_negativeY_pressed);
+    connect(btn_positiveZ, &QPushButton::pressed, this, &MainWindow::btn_positiveZ_pressed);
+    connect(btn_negativeZ, &QPushButton::pressed, this, &MainWindow::btn_negativeZ_pressed);
+
     tab4WidgetLayout->addWidget(lbl_robot_communication_output);
     tab4WidgetLayout->addWidget(btn_start_robot_communication);
     tab4WidgetLayout->addWidget(btn_stop_robot_communication);
     tab4WidgetLayout->addWidget(robot_communication_output);
     tab4WidgetLayout->addWidget(itb_robot_communication);
-
-
+    tab4WidgetLayout->addWidget(controlPanel);
 
     robot_communication->setPath("/home/adam/Desktop/robot-control/build/robot-control");
 
@@ -392,6 +427,66 @@ void MainWindow::setChessPosition(Chessboard *chessboard, ChessGame *chess_game,
 void MainWindow::initiateReset()
 {
     emit reset();
+}
+
+void MainWindow::btn_positiveX_pressed()
+{
+    float val = cb_distances->currentText().toFloat() / 100;
+    QByteArray bq_val;
+    bq_val.setNum(val);
+
+    QByteArray cmd = "move_relative " + bq_val + " 0 0 0 0 0";
+    robot_communication->send(cmd);
+}
+
+void MainWindow::btn_negativeX_pressed()
+{
+    float val = cb_distances->currentText().toFloat() / 100;
+    QByteArray bq_val;
+    bq_val.setNum(val);
+
+    QByteArray cmd = "move_relative -" + bq_val + " 0 0 0 0 0";
+    robot_communication->send(cmd);
+}
+
+void MainWindow::btn_positiveY_pressed()
+{
+    float val = cb_distances->currentText().toFloat() / 100;
+    QByteArray bq_val;
+    bq_val.setNum(val);
+
+    QByteArray cmd = "move_relative 0 " + bq_val + " 0 0 0 0";
+    robot_communication->send(cmd);
+}
+
+void MainWindow::btn_negativeY_pressed()
+{
+    float val = cb_distances->currentText().toFloat() / 100;
+    QByteArray bq_val;
+    bq_val.setNum(val);
+
+    QByteArray cmd = "move_relative 0 -" + bq_val + " 0 0 0 0";
+    robot_communication->send(cmd);
+}
+
+void MainWindow::btn_positiveZ_pressed()
+{
+    float val = cb_distances->currentText().toFloat() / 100;
+    QByteArray bq_val;
+    bq_val.setNum(val);
+
+    QByteArray cmd = "move_relative 0 0 " + bq_val + " 0 0 0";
+    robot_communication->send(cmd);
+}
+
+void MainWindow::btn_negativeZ_pressed()
+{
+    float val = cb_distances->currentText().toFloat() / 100;
+    QByteArray bq_val;
+    bq_val.setNum(val);
+
+    QByteArray cmd = "move_relative 0 0 -" + bq_val + " 0 0 0";
+    robot_communication->send(cmd);
 }
 
 //void MainWindow::btn_forwards_pressed()

@@ -166,9 +166,9 @@ void SerialPortHandler::close()
     emit disconnected();
 }
 
-void SerialPortHandler::send()
+void SerialPortHandler::send(QString cmd)
 {
-//    QByteArray data =
+    writeData(cmd.toUtf8());
 }
 
 void SerialPortHandler::writeData(const QByteArray &data)
@@ -185,7 +185,7 @@ void SerialPortHandler::writeData(const QByteArray &data)
     }
 
     if (chb_localEchoEnabled) {
-        output_serialPort->appendPlainText(data);
+//        output_serialPort->appendPlainText(data);
     }
 }
 

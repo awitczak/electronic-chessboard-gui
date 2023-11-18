@@ -143,7 +143,7 @@ void Scheduler::gripperConnected()
 
 void Scheduler::gripperDisconnected()
 {
-    schedulerMsg("Gripper connected!");
+    schedulerMsg("Gripper disconnected!");
     f_gripper.connected = false;
 }
 

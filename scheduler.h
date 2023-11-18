@@ -57,6 +57,10 @@ public:
 
     void run() override;
 
+signals:
+    void sendRobotCommand(QString);
+    void sendGripperCommand(QString);
+
 public slots:
     void stockfishConnected();
     void stockfishDisconnected();

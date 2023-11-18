@@ -29,8 +29,6 @@ void EvaluationBar::paintEvent(QPaintEvent *event)
 
     int value = mapFloatToIntRange(currentEvalValue, -50.0, 50.0, 0, 100);
 
-    qDebug() << value << mateFound;
-
     if (mateFound) {
         if (value >= 0) {
             value = 100;
