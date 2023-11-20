@@ -36,6 +36,7 @@ typedef struct {
 
 typedef struct {
     bool connected;
+    bool person;
 
 } objectDetectionFlags;
 
@@ -46,6 +47,8 @@ typedef struct {
 
 typedef struct {
     bool connected;
+    bool moving;
+    bool interrupted;
 
 } robotCommunicationFlags;
 
@@ -58,7 +61,7 @@ public:
     void run() override;
 
 signals:
-    void sendRobotCommand(QString);
+    void sendRobotCommand(QByteArray);
     void sendGripperCommand(QString);
 
 public slots:

@@ -16,6 +16,8 @@ public:
 
 signals:
     void output(QString data);
+    void moving();
+    void notMoving();
     void connected();
     void disconnected();
 
@@ -36,6 +38,8 @@ private slots:
 private:
     QString getProcess();
     void startRobotComm();
+
+    void processOutput(QString data);
 
     QProcess m_process;
     QString m_path;

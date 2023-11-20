@@ -108,6 +108,8 @@ void RobotCommunicationHandler::readyRead()
 
     QByteArray data = m_process.readAll().trimmed();
 
+    processOutput(data);
+
     emit output(data);
 }
 
@@ -129,4 +131,18 @@ void RobotCommunicationHandler::startRobotComm()
     m_process.write(command);
 
     emit connected();
+}
+
+void RobotCommunicationHandler::processOutput(QString data)
+{
+    if (data.contains("Moving to")) {
+        qDebug() << "movement started";
+
+        emit moving();
+    }
+    if (data.contains("Target reached!")) {
+        qDebug() << "movement finished";
+
+        emit notMoving();
+    }
 }

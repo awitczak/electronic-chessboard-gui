@@ -11,10 +11,13 @@ Scheduler::Scheduler()
     f_eChessboard.connected = false;
 
     f_detection.connected = false;
+    f_detection.person = false;
 
     f_gripper.connected = false;
 
     f_robotCom.connected = false;
+    f_robotCom.moving = false;
+    f_robotCom.interrupted = false;
 
     state = SETUP;
     schedulerMsg("Scheduler initialized!");
@@ -68,12 +71,30 @@ void Scheduler::objectDetectionDisconnected()
 
 void Scheduler::personDetected()
 {
-//    qDebug() << "Person detected!";
+    if (!f_detection.person && f_robotCom.moving) {
+        f_detection.person = true;
+        f_robotCom.interrupted = true;
+        emit sendRobotCommand("stop");
+
+        schedulerMsg("Person detected - stop initiated.");
+
+        msleep(2500);
+        f_robotCom.moving = false;
+    }
 }
 
 void Scheduler::personNotDetected()
 {
+    if (f_detection.person) {
+        msleep(1500);
+        f_detection.person = false;
 
+        if (f_robotCom.interrupted) {
+            emit sendRobotCommand("home");
+
+            schedulerMsg("Robot returning home after interruption.");
+        }
+    }
 }
 
 void Scheduler::eChessboardConnected()
