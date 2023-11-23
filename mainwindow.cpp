@@ -38,6 +38,8 @@ MainWindow::MainWindow(QWidget *parent)
     // connecting robotCom
     connect(robot_communication, &RobotCommunicationHandler::connected, scheduler, &Scheduler::robotComConnected);
     connect(robot_communication, &RobotCommunicationHandler::disconnected, scheduler, &Scheduler::robotComDisconnected);
+    connect(robot_communication, &RobotCommunicationHandler::moving, scheduler, &Scheduler::robotComMoving);
+    connect(robot_communication, &RobotCommunicationHandler::notMoving, scheduler, &Scheduler::robotComNotMoving);
     connect(scheduler, &Scheduler::sendRobotCommand, robot_communication, &RobotCommunicationHandler::send);
 
 

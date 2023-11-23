@@ -151,6 +151,18 @@ void Scheduler::robotComBusy()
 
 }
 
+void Scheduler::robotComMoving()
+{
+    schedulerMsg("robotCom started movement!");
+    f_robotCom.moving = true;
+}
+
+void Scheduler::robotComNotMoving()
+{
+    schedulerMsg("robotCom finished movement!");
+    f_robotCom.moving = false;
+}
+
 void Scheduler::robotComFault()
 {
 

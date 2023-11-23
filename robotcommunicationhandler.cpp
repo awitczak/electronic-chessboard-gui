@@ -136,13 +136,9 @@ void RobotCommunicationHandler::startRobotComm()
 void RobotCommunicationHandler::processOutput(QString data)
 {
     if (data.contains("Moving to")) {
-        qDebug() << "movement started";
-
         emit moving();
     }
     if (data.contains("Target reached!")) {
-        qDebug() << "movement finished";
-
         emit notMoving();
     }
 }

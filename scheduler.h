@@ -87,6 +87,8 @@ public slots:
     void robotComDisconnected();
     void robotComReady();
     void robotComBusy();
+    void robotComMoving();
+    void robotComNotMoving();
     void robotComFault();
 
     void gripperConnected();
