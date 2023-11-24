@@ -236,6 +236,16 @@ void ChessGame::getChessboardOutput(const QByteArray &data)
 
     QStringList dataList = chessboardData.split('#');
 
+    if (dataList[0] == "0") {
+        if (chessboardData.contains("initial")) {
+            emit initBoardSetupWait();
+        }
+
+        if (chessboardData.contains("Return")) {
+            emit returnToPositionWait();
+        }
+    }
+
     if (dataList[0] == "1") {
 
         whoseTurn = !whoseTurn;
@@ -271,5 +281,17 @@ void ChessGame::getChessboardOutput(const QByteArray &data)
         emit boardStateChanged(board_state);
         emit sendFENtoStockfish(QByteArray::fromStdString(FEN));
         emit whoseTurnInfo(whoseTurn);
+
+        emit movePlayed();
+    }
+
+    if (dataList[0] == "2") {
+        if (chessboardData.contains("start")) {
+            emit initBoardSetupDone();
+        }
+
+        if (chessboardData.contains("proceed")) {
+            emit returnToPositionDone();
+        }
     }
 }

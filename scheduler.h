@@ -9,7 +9,8 @@ typedef enum {
     IDLE = 0,
     SETUP,
     GAME,
-    FINISHED
+    FINISHED,
+    FAULT
 
 } State;
 
@@ -25,12 +26,16 @@ typedef struct {
 
 typedef struct {
     bool connected;
+    bool setupDone;
+    bool correctPos;
+    bool movePlayed;
 
 } eChessboardFlags;
 
 typedef struct {
     bool started;
     bool finished;
+    bool turn;
 
 } chessgameFlags;
 
@@ -42,6 +47,7 @@ typedef struct {
 
 typedef struct {
     bool connected;
+    bool ready;
 
 } gripperFlags;
 
@@ -78,10 +84,11 @@ public slots:
 
     void eChessboardConnected();
     void eChessboardDisconnected();
-    void eChessboardReady();
-    void eChessboardBusy();
-    void eChessboardFault();
-    void eChessboardNewMoveMade();
+    void eChessboardInitBoardSetupDone();
+    void eChessboardInitBoardSetupWait();
+    void eChessboardReturnToPositionWait();
+    void eChessboardReturnToPositionDone();
+    void eChessboardMovePlayed();
 
     void robotComConnected();
     void robotComDisconnected();
@@ -101,6 +108,8 @@ public slots:
     void chessgameWhiteMove();
     void chessgameBlackMove();
     void chessgameEnd();
+
+    void reset();
 
 
 private:

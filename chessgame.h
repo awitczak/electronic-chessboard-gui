@@ -43,6 +43,12 @@ signals:
     void sendFENtoStockfish(QByteArray FEN);
     void whoseTurnInfo(bool whoseTurn);
 
+    void movePlayed();
+    void initBoardSetupDone();
+    void initBoardSetupWait();
+    void returnToPositionWait();
+    void returnToPositionDone();
+
 private:
     std::vector<std::vector<char>> board_state{8, std::vector<char>(8, '0')};
     std::vector<std::string> chess_algebraic_notation, short_chess_algebraic_notation;

@@ -24,6 +24,13 @@ MainWindow::MainWindow(QWidget *parent)
     connect(eChessboard, &BluetoothConnectionHandler::connected, scheduler, &Scheduler::eChessboardConnected);
     connect(scheduler, &Scheduler::eChessboardDisconnected, eChessboard, &BluetoothConnectionHandler::disconnected);
 
+    // connecting ChessGame
+    connect(chess_game, &ChessGame::initBoardSetupDone, scheduler, &Scheduler::eChessboardInitBoardSetupDone);
+    connect(chess_game, &ChessGame::initBoardSetupWait, scheduler, &Scheduler::eChessboardInitBoardSetupWait);
+    connect(chess_game, &ChessGame::returnToPositionDone, scheduler, &Scheduler::eChessboardReturnToPositionDone);
+    connect(chess_game, &ChessGame::returnToPositionWait, scheduler, &Scheduler::eChessboardReturnToPositionWait);
+    connect(chess_game, &ChessGame::movePlayed, scheduler, &Scheduler::eChessboardMovePlayed);
+
     // connecting object_detection
     connect(object_detection, &ObjectDetectionHandler::connected, scheduler, &Scheduler::objectDetectionConnected);
     connect(object_detection, &ObjectDetectionHandler::disconnected, scheduler, &Scheduler::objectDetectionDisconnected);
@@ -33,6 +40,8 @@ MainWindow::MainWindow(QWidget *parent)
     // connecting gripper
     connect(serial_port, &SerialPortHandler::connected, scheduler, &Scheduler::gripperConnected);
     connect(serial_port, &SerialPortHandler::disconnected, scheduler, &Scheduler::gripperDisconnected);
+    connect(serial_port, &SerialPortHandler::ready, scheduler, &Scheduler::gripperReady);
+    connect(serial_port, &SerialPortHandler::busy, scheduler, &Scheduler::gripperBusy);
     connect(scheduler, &Scheduler::sendGripperCommand, serial_port, &SerialPortHandler::send);
 
     // connecting robotCom
@@ -324,7 +333,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 
     // signals
-    connect(stockfish, &Stockfish::output, this, &MainWindow::output);
+    connect(stockfish, &Stockfish::output, this, &MainWindow::stockfishOutput);
     connect(itb_stockfish, &InputTextBox::enterPressed, stockfish, &Stockfish::send);
 
     connect(chessboard, &Chessboard::resizeEvalBar, evaluationBar, &EvaluationBar::resizeEvalBar);
@@ -343,8 +352,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(eChessboard, &BluetoothConnectionHandler::dataReceived, chess_game, &ChessGame::getChessboardOutput);
 
-//    connect(inputTextBox_send3, &InputTextBox::enterPressed, this, [this, chessboard, chess_game, inputTextBox_send3]() {setChessPosition(chessboard, chess_game, inputTextBox_send3->toPlainText().toUtf8());});
-
     connect(stockfish, &Stockfish::mateEvaluated, evaluationBar, &EvaluationBar::mateEvaluated);
     connect(stockfish, &Stockfish::currentEvaluation, evaluationBar, &EvaluationBar::updateEvalBar);
 
@@ -361,6 +368,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(this, &MainWindow::reset, chess_game, &ChessGame::resetChessGame);
     connect(this, &MainWindow::reset, stockfish, &Stockfish::resetStockfish);
     connect(this, &MainWindow::reset, evaluationBar, &EvaluationBar::resetEvalBar);
+    connect(this, &MainWindow::reset, scheduler, &Scheduler::reset);
 
     connect(btn_connect_bluetooth, &QPushButton::pressed, this, &MainWindow::initiateReset);
 
@@ -383,7 +391,7 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::output(QString data)
+void MainWindow::stockfishOutput(QString data)
 {
     stockfish_output->appendPlainText(data);
 }
@@ -491,26 +499,6 @@ void MainWindow::btn_negativeZ_pressed()
     QByteArray cmd = "move_relative 0 0 -" + bq_val + " 0 0 0";
     robot_communication->send(cmd);
 }
-
-//void MainWindow::btn_forwards_pressed()
-//{
-//    chess_game->increaseCurrentPositionIdx();
-//}
-
-//void MainWindow::btn_backwards_pressed()
-//{
-//    chess_game->decreaseCurrentPositionIdx();
-//}
-
-//void MainWindow::btn_start_pressed()
-//{
-//    chess_game->setCurrentPositionIdx(0);
-//}
-
-//void MainWindow::btn_end_pressed()
-//{
-//    chess_game->setCurrentPositionIdx(chess_game->getLatestPositionIdx());
-//}
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {

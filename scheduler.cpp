@@ -9,11 +9,19 @@ Scheduler::Scheduler()
     f_stockfish.connected = false;
 
     f_eChessboard.connected = false;
+    f_eChessboard.setupDone = false;
+    f_eChessboard.correctPos = false;
+    f_eChessboard.movePlayed = false;
+
+    f_chessgame.started = false;
+    f_chessgame.finished = false;
+    f_chessgame.turn = false;
 
     f_detection.connected = false;
     f_detection.person = false;
 
     f_gripper.connected = false;
+    f_gripper.ready = false;
 
     f_robotCom.connected = false;
     f_robotCom.moving = false;
@@ -109,24 +117,30 @@ void Scheduler::eChessboardDisconnected()
     f_eChessboard.connected = false;
 }
 
-void Scheduler::eChessboardReady()
+void Scheduler::eChessboardInitBoardSetupDone()
 {
-
+    f_eChessboard.setupDone = true;
 }
 
-void Scheduler::eChessboardBusy()
+void Scheduler::eChessboardInitBoardSetupWait()
 {
-
+    f_eChessboard.setupDone = false;
 }
 
-void Scheduler::eChessboardFault()
+void Scheduler::eChessboardReturnToPositionWait()
 {
-
+    f_eChessboard.correctPos = false;
 }
 
-void Scheduler::eChessboardNewMoveMade()
+void Scheduler::eChessboardReturnToPositionDone()
 {
+    f_eChessboard.correctPos = true;
+    schedulerMsg("correct");
+}
 
+void Scheduler::eChessboardMovePlayed()
+{
+    f_eChessboard.movePlayed = true;
 }
 
 void Scheduler::robotComConnected()
@@ -182,12 +196,12 @@ void Scheduler::gripperDisconnected()
 
 void Scheduler::gripperReady()
 {
-
+    f_gripper.ready = true;
 }
 
 void Scheduler::gripperBusy()
 {
-
+    f_gripper.ready = false;
 }
 
 void Scheduler::gripperFault()
@@ -215,6 +229,40 @@ void Scheduler::chessgameEnd()
 
 }
 
+void Scheduler::reset()
+{
+    quit();
+
+    f_scheduler.isFinished = false;
+    f_scheduler.stateMsg = false;
+
+    f_stockfish.connected = false;
+
+    f_eChessboard.connected = false;
+    f_eChessboard.setupDone = false;
+    f_eChessboard.correctPos = false;
+    f_eChessboard.movePlayed = false;
+
+    f_chessgame.started = false;
+    f_chessgame.finished = false;
+    f_chessgame.turn = false;
+
+    f_detection.connected = false;
+    f_detection.person = false;
+
+    f_gripper.connected = false;
+    f_gripper.ready = false;
+
+    f_robotCom.connected = false;
+    f_robotCom.moving = false;
+    f_robotCom.interrupted = false;
+
+    state = SETUP;
+    schedulerMsg("Scheduler initialized!");
+
+    start();
+}
+
 void Scheduler::mainLoop()
 {
     while (!f_scheduler.isFinished) {
@@ -237,7 +285,10 @@ void Scheduler::mainLoop()
             if (f_stockfish.connected && f_eChessboard.connected && f_detection.connected && f_gripper.connected && f_robotCom.connected) {
                 schedulerMsg("Setup done!");
                 state = GAME;
+                f_scheduler.stateMsg = false;
             }
+            state = GAME; // delete this <<<<<<<<<<<<<<
+            break;
 
         case GAME:
             if (!f_scheduler.stateMsg) {
@@ -245,9 +296,96 @@ void Scheduler::mainLoop()
                 f_scheduler.stateMsg = true;
             }
 
+//            if (!f_eChessboard.connected) {
+//                state = FAULT;
+//                break;
+//            }
+
+            if (f_eChessboard.setupDone) {
+                {
+                    f_eChessboard.correctPos = true;
+                    f_chessgame.started = true;
+                    while (f_chessgame.started) {
+                        if (f_eChessboard.correctPos) {
+                            if (f_eChessboard.movePlayed) {
+                                f_chessgame.turn = !f_chessgame.turn;
+
+                                if (f_chessgame.turn) {
+                                    schedulerMsg("Black moving!");
+
+                                    emit sendRobotCommand("move_relative 0 0 0.05 0 0 0");
+
+                                    msleep(500);
+                                    while (f_robotCom.moving) {
+                                        // wait
+                                        schedulerMsg("waiting for robot");
+                                        msleep(250);
+                                    }
+
+                                    emit sendGripperCommand("home");
+
+                                    while (!f_gripper.ready) {
+                                        // wait
+                                        schedulerMsg("waiting for gripper");
+                                        msleep(50);
+                                    }
+
+                                    emit sendRobotCommand("move_relative 0 0 -0.05 0 0 0");
+
+                                    msleep(500);
+                                    while (f_robotCom.moving) {
+                                        // wait
+                                        schedulerMsg("waiting for robot");
+                                        msleep(250);
+                                    }
+
+                                    emit sendGripperCommand("home");
+
+                                    while (!f_gripper.ready) {
+                                        // wait
+                                        schedulerMsg("waiting for gripper");
+                                        msleep(50);
+                                    }
+
+
+                                    f_eChessboard.movePlayed = false;
+                                }
+                                else {
+                                    schedulerMsg("White moving!");
+
+                                    f_eChessboard.movePlayed = false;
+                                }
+                            }
+                            else {
+                                schedulerMsg("Waiting for a move!");
+                            }
+                        }
+                        else {
+                            schedulerMsg("Error detected!");
+                            // signal to emit an error to screen, that the position needs to be adjusted
+
+                            while (!f_eChessboard.correctPos) {
+                                msleep(500);
+                            }
+                            schedulerMsg("Resumed!");
+                        }
+
+                        msleep(500);
+                    }
+                }
+
+            }
+
+
+
             break;
 
         case FINISHED:
+
+            break;
+
+        case FAULT:
+
             break;
 
         default:

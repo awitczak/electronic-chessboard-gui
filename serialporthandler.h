@@ -44,6 +44,8 @@ public:
 signals:
     void connected();
     void disconnected();
+    void ready();
+    void busy();
 
 public slots:
     void send(QString cmd);
@@ -75,6 +77,8 @@ private:
     void initActionsConnections();
     void showStatusMessage(const QString &message);
     void showWriteError(const QString &message);
+
+    void processData(const QByteArray &data);
 
 private:
     // settings

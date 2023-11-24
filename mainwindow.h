@@ -43,7 +43,7 @@ signals:
     void reset();
 
 private slots:
-    void output(QString data);
+    void stockfishOutput(QString data);
     void eChessboardOutput(const QByteArray &data);
     void robotCommunicationOutput(QString data);
     void objectDetectionOutput(QString data);

@@ -169,6 +169,7 @@ void SerialPortHandler::close()
 void SerialPortHandler::send(QString cmd)
 {
     writeData(cmd.toUtf8());
+    emit busy();
 }
 
 void SerialPortHandler::writeData(const QByteArray &data)
@@ -192,6 +193,8 @@ void SerialPortHandler::writeData(const QByteArray &data)
 void SerialPortHandler::readData()
 {
     const QByteArray data = m_serialPort->readAll();
+
+    processData(data);
 
     output_serialPort->appendPlainText(data);
 }
@@ -318,4 +321,11 @@ void SerialPortHandler::showStatusMessage(const QString &message)
 void SerialPortHandler::showWriteError(const QString &message)
 {
     QMessageBox::warning(this, tr("Warning"), message);
+}
+
+void SerialPortHandler::processData(const QByteArray &data)
+{
+    if (data.contains("Done")) {
+        emit ready();
+    }
 }
