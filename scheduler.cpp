@@ -85,8 +85,6 @@ void Scheduler::personDetected()
         emit sendRobotCommand("stop");
 
         schedulerMsg("Person detected - stop initiated.");
-
-        msleep(2500);
         f_robotCom.moving = false;
     }
 }
@@ -94,7 +92,7 @@ void Scheduler::personDetected()
 void Scheduler::personNotDetected()
 {
     if (f_detection.person) {
-        msleep(1500);
+        msleep(5000);
         f_detection.person = false;
 
         if (f_robotCom.interrupted) {
@@ -282,12 +280,15 @@ void Scheduler::mainLoop()
                 f_scheduler.stateMsg = true;
             }
 
+            qDebug() << f_stockfish.connected << f_eChessboard.connected << f_detection.connected << f_gripper.connected << f_robotCom.connected;
+
             if (f_stockfish.connected && f_eChessboard.connected && f_detection.connected && f_gripper.connected && f_robotCom.connected) {
                 schedulerMsg("Setup done!");
                 state = GAME;
                 f_scheduler.stateMsg = false;
             }
-            state = GAME; // delete this <<<<<<<<<<<<<<
+
+            state = GAME;
             break;
 
         case GAME:
@@ -385,6 +386,7 @@ void Scheduler::mainLoop()
             break;
 
         case FAULT:
+            // handle faults
 
             break;
 

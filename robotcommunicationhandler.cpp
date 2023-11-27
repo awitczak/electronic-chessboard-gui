@@ -45,6 +45,17 @@ void RobotCommunicationHandler::send(QByteArray cmd)
     m_process.write(cmd + "\n");
 }
 
+void RobotCommunicationHandler::setChessboardA1CornerPos()
+{
+    send("get_tcp_pos");
+
+    cornerPos_A1 = currentTCP;
+
+    for (auto coord : cornerPos_A1) {
+        qDebug() << coord << "here";
+    }
+}
+
 void RobotCommunicationHandler::errorOccurred(QProcess::ProcessError error)
 {
     if (!m_listening) return;
@@ -82,6 +93,7 @@ void RobotCommunicationHandler::readyReadStandardOutput()
 void RobotCommunicationHandler::started()
 {
     send("Robot connection established");
+    send("get_tcp_pos");
 }
 
 void RobotCommunicationHandler::stateChanged(QProcess::ProcessState newState)
@@ -141,4 +153,9 @@ void RobotCommunicationHandler::processOutput(QString data)
     if (data.contains("Target reached!")) {
         emit notMoving();
     }
+
+    if (data.contains("current_tcp_pos")) {
+        currentTCP = data.split(" ");
+    }
+
 }

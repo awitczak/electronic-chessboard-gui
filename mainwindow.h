@@ -40,6 +40,7 @@ public:
 
 signals:
     void bestMoveFound(QString best_move);
+    void setCornerPos_A1();
     void reset();
 
 private slots:
@@ -56,6 +57,8 @@ private slots:
     void btn_negativeY_pressed();
     void btn_positiveZ_pressed();
     void btn_negativeZ_pressed();
+
+    void btn_setA1Corner_pressed();
 
     // buttons
 //    void btn_forwards_pressed();

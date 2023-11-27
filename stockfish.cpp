@@ -59,6 +59,8 @@ void Stockfish::resetStockfish()
     send("ucinewgame");
     send("isready");
     send("go depth 20");
+
+    emit connected();
 }
 
 void Stockfish::errorOccurred(QProcess::ProcessError error)

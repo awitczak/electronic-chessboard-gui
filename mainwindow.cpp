@@ -286,6 +286,7 @@ MainWindow::MainWindow(QWidget *parent)
     QPushButton *btn_positiveZ = new QPushButton();
     QPushButton *btn_negativeZ = new QPushButton();
     cb_distances = new QComboBox();
+    QPushButton *btn_setA1Corner = new QPushButton();
 
     btn_positiveX->setText("X+");
     btn_negativeX->setText("X-");
@@ -293,7 +294,8 @@ MainWindow::MainWindow(QWidget *parent)
     btn_negativeY->setText("Y-");
     btn_positiveZ->setText("Z+");
     btn_negativeZ->setText("Z-");
-    cb_distances->addItems({QStringLiteral("0.1"), QStringLiteral("0.5"), QStringLiteral("1"), QStringLiteral("10")});
+    cb_distances->addItems({QStringLiteral("0.1"), QStringLiteral("0.5"), QStringLiteral("1"), QStringLiteral("5"), QStringLiteral("10")});
+    btn_setA1Corner->setText("set A1 corner");
 
     controlPanelLayout->addWidget(btn_negativeX);
     controlPanelLayout->addWidget(btn_positiveX);
@@ -302,6 +304,7 @@ MainWindow::MainWindow(QWidget *parent)
     controlPanelLayout->addWidget(btn_negativeZ);
     controlPanelLayout->addWidget(btn_positiveZ);
     controlPanelLayout->addWidget(cb_distances);
+    controlPanelLayout->addWidget(btn_setA1Corner);
 
     connect(btn_positiveX, &QPushButton::pressed, this, &MainWindow::btn_positiveX_pressed);
     connect(btn_negativeX, &QPushButton::pressed, this, &MainWindow::btn_negativeX_pressed);
@@ -309,6 +312,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(btn_negativeY, &QPushButton::pressed, this, &MainWindow::btn_negativeY_pressed);
     connect(btn_positiveZ, &QPushButton::pressed, this, &MainWindow::btn_positiveZ_pressed);
     connect(btn_negativeZ, &QPushButton::pressed, this, &MainWindow::btn_negativeZ_pressed);
+    connect(btn_setA1Corner, &QPushButton::pressed, this, &MainWindow::btn_setA1Corner_pressed);
+    connect(this, &MainWindow::setCornerPos_A1, robot_communication, &RobotCommunicationHandler::setChessboardA1CornerPos);
 
     tab4WidgetLayout->addWidget(lbl_robot_communication_output);
     tab4WidgetLayout->addWidget(btn_start_robot_communication);
@@ -498,6 +503,11 @@ void MainWindow::btn_negativeZ_pressed()
 
     QByteArray cmd = "move_relative 0 0 -" + bq_val + " 0 0 0";
     robot_communication->send(cmd);
+}
+
+void MainWindow::btn_setA1Corner_pressed()
+{
+    emit setCornerPos_A1();
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)

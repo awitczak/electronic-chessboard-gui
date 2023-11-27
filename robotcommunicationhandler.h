@@ -26,6 +26,8 @@ public slots:
     void stop();
     void send(QByteArray cmd);
 
+    void setChessboardA1CornerPos();
+
 private slots:
     void errorOccurred(QProcess::ProcessError error);
     void finished(int exitCode, QProcess::ExitStatus exitStatus);
@@ -44,6 +46,9 @@ private:
     QProcess m_process;
     QString m_path;
     bool m_listening;
+
+    QStringList currentTCP;
+    QStringList cornerPos_A1;
 };
 
 #endif // ROBOTCOMMUNICATIONHANDLER_H
