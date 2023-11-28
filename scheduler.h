@@ -21,6 +21,7 @@ typedef struct {
 
 typedef struct {
     bool connected;
+    bool ready;
 
 } stockfishFlags;
 
@@ -70,6 +71,9 @@ signals:
     void sendRobotCommand(QByteArray);
     void sendGripperCommand(QString);
 
+    void moveRobotToFirstField();
+    void moveRobotToSecondField();
+
 public slots:
     void stockfishConnected();
     void stockfishDisconnected();
@@ -107,6 +111,7 @@ public slots:
     void chessgameStart();
     void chessgameWhiteMove();
     void chessgameBlackMove();
+    void chessgamePieceInfo(char piece);
     void chessgameEnd();
 
     void reset();
@@ -127,6 +132,8 @@ private:
     void mainLoop();
     void initFlags();
     void schedulerMsg(QString msg);
+
+    char pieceToMove;
 
 };
 

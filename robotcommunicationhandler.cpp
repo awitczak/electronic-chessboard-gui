@@ -13,6 +13,31 @@ RobotCommunicationHandler::RobotCommunicationHandler(QObject *parent)
 
     m_listening = false;
     m_path = "";
+
+    currentTCP = {"0", "0", "0", "0", "0", "0"};
+    cornerPos_A1 = {"0", "0", "0", "0", "0", "0"};
+    cornerPos_A8 = {"0", "0", "0", "0", "0", "0"};
+    cornerPos_H1 = {"0", "0", "0", "0", "0", "0"};
+    cornerPos_H8 = {"0", "0", "0", "0", "0", "0"};
+
+    A1_set = false;
+    H8_set = false;
+
+    update_A1_pos = false;
+    update_H8_pos = false;
+    update_Z0_pos = false;
+
+    chessboard_a_X = 0.0;
+    chessboard_b_X = 0.0;
+    chessboard_a_Y = 0.0;
+    chessboard_b_Y = 0.0;
+
+    chessboardSquareCenterDistance = 0.051;
+
+    fromField = "";
+    toField = "";
+
+    Z0 = "";
 }
 
 QString RobotCommunicationHandler::getPath() const
@@ -45,15 +70,51 @@ void RobotCommunicationHandler::send(QByteArray cmd)
     m_process.write(cmd + "\n");
 }
 
-void RobotCommunicationHandler::setChessboardA1CornerPos()
+void RobotCommunicationHandler::setChessboardCornerPos(QString corner)
 {
-    send("get_tcp_pos");
-
-    cornerPos_A1 = currentTCP;
-
-    for (auto coord : cornerPos_A1) {
-        qDebug() << coord << "here";
+    if (corner.contains("A1")) {
+        cornerPos_A1 = currentTCP;
+        A1_set = true;
     }
+    if (corner.contains("H8")) {
+        cornerPos_H8 = currentTCP;
+        H8_set = true;
+    }
+
+    if (A1_set && H8_set) {
+        calculateRemainingCorners();
+        A1_set = false;
+        H8_set = false;
+    }
+
+    qDebug() << currentTCP;
+}
+
+void RobotCommunicationHandler::setZ0()
+{
+    Z0 = currentTCP[2];
+
+    qDebug() << "current Z0:" << Z0;
+}
+
+void RobotCommunicationHandler::setCurrentMove(QString move)
+{
+    fromField = move.mid(0, 2).toUpper();
+    toField = move.mid(2).toUpper();
+
+    getPieceFromField(fromField);
+
+    qDebug() << "From: " << fromField << "  to: " << toField;
+}
+
+void RobotCommunicationHandler::moveRobotToFirstField()
+{
+    moveToField(fromField);
+}
+
+void RobotCommunicationHandler::moveRobotToSecondField()
+{
+    moveToField(toField);
 }
 
 void RobotCommunicationHandler::errorOccurred(QProcess::ProcessError error)
@@ -155,7 +216,100 @@ void RobotCommunicationHandler::processOutput(QString data)
     }
 
     if (data.contains("current_tcp_pos")) {
-        currentTCP = data.split(" ");
-    }
 
+        int temp_idx = data.indexOf("current_tcp_pos: ");
+        QString temp = data.mid(temp_idx + strlen("current_tcp_pos: "));
+
+        currentTCP = temp.split(" ");
+
+        if (update_A1_pos) {
+            emit tcp_updated("A1");
+            update_A1_pos = false;
+        }
+        if (update_H8_pos) {
+            emit tcp_updated("H8");
+            update_H8_pos = false;
+        }
+        if (update_Z0_pos) {
+            emit tcp_Z0_updated();
+            update_Z0_pos = false;
+        }
+    }
+}
+
+void RobotCommunicationHandler::calculateRemainingCorners()
+{
+    float x_center = 0.0;
+    float y_center = 0.0;
+
+    float x_A1 = cornerPos_A1[0].toFloat();
+    float y_A1 = cornerPos_A1[1].toFloat();
+
+    float x_H8 = cornerPos_H8[0].toFloat();
+    float y_H8 = cornerPos_H8[1].toFloat();
+
+    x_center = (x_A1 + x_H8) / 2;
+    y_center = (y_A1 + y_H8) / 2;
+
+    qDebug() << "x/y_center: " << x_center << y_center;
+
+    float v_x = x_A1 - x_center;
+    float v_y = y_A1 - y_center;
+
+    cornerPos_A8 = cornerPos_A1;
+    cornerPos_A8[0] = QString::number(x_center + v_y);
+    cornerPos_A8[1] = QString::number(y_center - v_x);
+
+    cornerPos_H1 = cornerPos_H8;
+    cornerPos_H1[0] = QString::number(x_center - v_y);
+    cornerPos_H1[1] = QString::number(y_center + v_x);
+
+    calculateChessboardReferenceAxes();
+}
+
+void RobotCommunicationHandler::calculateChessboardReferenceAxes()
+{
+    // x axis
+    float x_A1 = cornerPos_A1[0].toFloat();
+    float y_A1 = cornerPos_A1[1].toFloat();
+
+    float x_H1 = cornerPos_H1[0].toFloat();
+    float y_H1 = cornerPos_H1[1].toFloat();
+
+    chessboard_a_X = (y_H1 - y_A1) / (x_H1 - x_A1);
+    chessboard_b_X = y_A1 - chessboard_a_X * x_A1;
+
+    float x_A8 = cornerPos_A8[0].toFloat();
+    float y_A8 = cornerPos_A8[1].toFloat();
+
+    chessboard_a_Y = (y_A8 - y_A1) / (x_A8 - x_A1);
+    chessboard_b_Y = y_A1 - chessboard_a_Y * x_A1;
+}
+
+void RobotCommunicationHandler::moveToPosition(QStringList targetPos)
+{
+    QString move_cmd = "move_absolute ";
+
+    for (auto p : targetPos) move_cmd += p + " ";
+
+    qDebug() << move_cmd;
+
+    send(move_cmd.toUtf8());
+}
+
+void RobotCommunicationHandler::moveToField(QString field)
+{
+    int x = field[0].unicode() - 'A';
+    int y = field[1].unicode() - '0' - 1;
+
+    qDebug() << x << y;
+
+    QStringList targetPos = cornerPos_A1;
+
+    // needs a rework, now hard coded X/Y coords, needs to account for rotation of new coordinate frame regarding the robot coordinate frame
+
+    targetPos[0] = QString::number(targetPos[0].toFloat() + chessboardSquareCenterDistance * x);
+    targetPos[1] = QString::number(targetPos[1].toFloat() + chessboardSquareCenterDistance * y);
+
+    moveToPosition(targetPos);
 }

@@ -36,6 +36,7 @@ public:
 
 public slots:
     void getChessboardOutput(const QByteArray &data);
+    void getPieceFromField(QString field);
     void resetChessGame();
 
 signals:
@@ -48,6 +49,8 @@ signals:
     void initBoardSetupWait();
     void returnToPositionWait();
     void returnToPositionDone();
+
+    void piece(char piece);
 
 private:
     std::vector<std::vector<char>> board_state{8, std::vector<char>(8, '0')};

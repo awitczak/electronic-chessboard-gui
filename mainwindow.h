@@ -40,7 +40,8 @@ public:
 
 signals:
     void bestMoveFound(QString best_move);
-    void setCornerPos_A1();
+    void setCornerPos(QString cornerPos);
+    void setGripperZ0();
     void reset();
 
 private slots:
@@ -58,7 +59,12 @@ private slots:
     void btn_positiveZ_pressed();
     void btn_negativeZ_pressed();
 
-    void btn_setA1Corner_pressed();
+    void btn_setA1_pressed();
+    void btn_setH8_pressed();
+    void btn_setZ0_pressed();
+
+    void tcp_updated(QString field);
+    void tcp_Z0_updated();
 
     // buttons
 //    void btn_forwards_pressed();

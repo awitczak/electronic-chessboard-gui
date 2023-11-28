@@ -22,6 +22,7 @@ signals:
     void currentEvaluation(float eval);
     void mateEvaluated(int mate_N);
     void currentBestMove(QString bestMove);
+    void ready();
 
 public slots:
     void start();

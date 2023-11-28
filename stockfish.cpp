@@ -132,6 +132,7 @@ void Stockfish::readyRead()
     emit output(data);
 
     getCurrentEval(data);
+    getCurrentBestMove(data);
 }
 
 QString Stockfish::getProcess()
@@ -164,6 +165,10 @@ void Stockfish::getCurrentBestMove(QString data)
         QString bestMove = data.mid(bestMove_last_idx, ponder_idx - 1 - bestMove_last_idx);
 
         emit currentBestMove(bestMove);
+
+
+        qDebug() << "stockfish emitted ready!";
+        emit ready();
     }
 }
 

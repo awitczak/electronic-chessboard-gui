@@ -19,6 +19,7 @@ MainWindow::MainWindow(QWidget *parent)
     // connecting stockfish
     connect(stockfish, &Stockfish::connected, scheduler, &Scheduler::stockfishConnected);
     connect(stockfish, &Stockfish::disconnected, scheduler, &Scheduler::stockfishDisconnected);
+    connect(stockfish, &Stockfish::ready, scheduler, &Scheduler::stockfishReady);
 
     // connecting eChessboard
     connect(eChessboard, &BluetoothConnectionHandler::connected, scheduler, &Scheduler::eChessboardConnected);
@@ -50,7 +51,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(robot_communication, &RobotCommunicationHandler::moving, scheduler, &Scheduler::robotComMoving);
     connect(robot_communication, &RobotCommunicationHandler::notMoving, scheduler, &Scheduler::robotComNotMoving);
     connect(scheduler, &Scheduler::sendRobotCommand, robot_communication, &RobotCommunicationHandler::send);
-
+    connect(scheduler, &Scheduler::moveRobotToFirstField, robot_communication, &RobotCommunicationHandler::moveRobotToFirstField);
+    connect(scheduler, &Scheduler::moveRobotToSecondField, robot_communication, &RobotCommunicationHandler::moveRobotToSecondField);
 
 
     // -------------------------- UI -----------------------------
@@ -286,7 +288,10 @@ MainWindow::MainWindow(QWidget *parent)
     QPushButton *btn_positiveZ = new QPushButton();
     QPushButton *btn_negativeZ = new QPushButton();
     cb_distances = new QComboBox();
-    QPushButton *btn_setA1Corner = new QPushButton();
+    QPushButton *btn_setA1 = new QPushButton();
+    QPushButton *btn_setH8 = new QPushButton();
+    QPushButton *btn_setZ0 = new QPushButton();
+
 
     btn_positiveX->setText("X+");
     btn_negativeX->setText("X-");
@@ -295,7 +300,9 @@ MainWindow::MainWindow(QWidget *parent)
     btn_positiveZ->setText("Z+");
     btn_negativeZ->setText("Z-");
     cb_distances->addItems({QStringLiteral("0.1"), QStringLiteral("0.5"), QStringLiteral("1"), QStringLiteral("5"), QStringLiteral("10")});
-    btn_setA1Corner->setText("set A1 corner");
+    btn_setA1->setText("set A1 corner");
+    btn_setH8->setText("set H8 corner");
+    btn_setZ0->setText("set Z0");
 
     controlPanelLayout->addWidget(btn_negativeX);
     controlPanelLayout->addWidget(btn_positiveX);
@@ -304,7 +311,9 @@ MainWindow::MainWindow(QWidget *parent)
     controlPanelLayout->addWidget(btn_negativeZ);
     controlPanelLayout->addWidget(btn_positiveZ);
     controlPanelLayout->addWidget(cb_distances);
-    controlPanelLayout->addWidget(btn_setA1Corner);
+    controlPanelLayout->addWidget(btn_setA1);
+    controlPanelLayout->addWidget(btn_setH8);
+    controlPanelLayout->addWidget(btn_setZ0);
 
     connect(btn_positiveX, &QPushButton::pressed, this, &MainWindow::btn_positiveX_pressed);
     connect(btn_negativeX, &QPushButton::pressed, this, &MainWindow::btn_negativeX_pressed);
@@ -312,8 +321,15 @@ MainWindow::MainWindow(QWidget *parent)
     connect(btn_negativeY, &QPushButton::pressed, this, &MainWindow::btn_negativeY_pressed);
     connect(btn_positiveZ, &QPushButton::pressed, this, &MainWindow::btn_positiveZ_pressed);
     connect(btn_negativeZ, &QPushButton::pressed, this, &MainWindow::btn_negativeZ_pressed);
-    connect(btn_setA1Corner, &QPushButton::pressed, this, &MainWindow::btn_setA1Corner_pressed);
-    connect(this, &MainWindow::setCornerPos_A1, robot_communication, &RobotCommunicationHandler::setChessboardA1CornerPos);
+    connect(btn_setA1, &QPushButton::pressed, this, &MainWindow::btn_setA1_pressed);
+    connect(btn_setH8, &QPushButton::pressed, this, &MainWindow::btn_setH8_pressed);
+    connect(btn_setZ0, &QPushButton::pressed, this, &MainWindow::btn_setZ0_pressed);
+
+    connect(robot_communication, &RobotCommunicationHandler::tcp_updated, this, &MainWindow::tcp_updated);
+    connect(robot_communication, &RobotCommunicationHandler::tcp_Z0_updated, this, &MainWindow::tcp_Z0_updated);
+    connect(this, &MainWindow::setGripperZ0, robot_communication, &RobotCommunicationHandler::setZ0);
+    connect(this, &MainWindow::setCornerPos, robot_communication, &RobotCommunicationHandler::setChessboardCornerPos);
+
 
     tab4WidgetLayout->addWidget(lbl_robot_communication_output);
     tab4WidgetLayout->addWidget(btn_start_robot_communication);
@@ -353,7 +369,8 @@ MainWindow::MainWindow(QWidget *parent)
 
 
 
-
+    connect(robot_communication, &RobotCommunicationHandler::getPieceFromField, chess_game, &ChessGame::getPieceFromField);
+    connect(chess_game, &ChessGame::piece, scheduler, &Scheduler::chessgamePieceInfo);
 
     connect(eChessboard, &BluetoothConnectionHandler::dataReceived, chess_game, &ChessGame::getChessboardOutput);
 
@@ -363,6 +380,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(chess_game, &ChessGame::boardStateChanged, chessboard, &Chessboard::updateChessboard);
 
     connect(this, &MainWindow::bestMoveFound, chessboard, &Chessboard::showBestMove);
+
+    connect(stockfish, &Stockfish::currentBestMove, robot_communication, &RobotCommunicationHandler::setCurrentMove);
 
     connect(chess_game, &ChessGame::sendFENtoStockfish, stockfish, &Stockfish::updateFEN);
 
@@ -505,9 +524,32 @@ void MainWindow::btn_negativeZ_pressed()
     robot_communication->send(cmd);
 }
 
-void MainWindow::btn_setA1Corner_pressed()
+void MainWindow::btn_setH8_pressed()
 {
-    emit setCornerPos_A1();
+    robot_communication->send("get_tcp_pos");
+    robot_communication->update_H8_pos = true;
+}
+
+void MainWindow::btn_setZ0_pressed()
+{
+    robot_communication->send("get_tcp_pos");
+    robot_communication->update_Z0_pos = true;
+}
+
+void MainWindow::tcp_updated(QString field)
+{
+    emit setCornerPos(field);
+}
+
+void MainWindow::tcp_Z0_updated()
+{
+    emit setGripperZ0();
+}
+
+void MainWindow::btn_setA1_pressed()
+{
+    robot_communication->send("get_tcp_pos");
+    robot_communication->update_A1_pos = true;
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)

@@ -7,6 +7,7 @@ Scheduler::Scheduler()
     f_scheduler.stateMsg = false;
 
     f_stockfish.connected = false;
+    f_stockfish.ready = false;
 
     f_eChessboard.connected = false;
     f_eChessboard.setupDone = false;
@@ -30,6 +31,8 @@ Scheduler::Scheduler()
     state = SETUP;
     schedulerMsg("Scheduler initialized!");
 
+    pieceToMove = '0';
+
     start();
 }
 
@@ -52,12 +55,12 @@ void Scheduler::stockfishDisconnected()
 
 void Scheduler::stockfishReady()
 {
-
+    f_stockfish.ready = true;
 }
 
 void Scheduler::stockfishBusy()
 {
-
+    f_stockfish.ready = false;
 }
 
 void Scheduler::stockfishFault()
@@ -222,6 +225,13 @@ void Scheduler::chessgameBlackMove()
 
 }
 
+void Scheduler::chessgamePieceInfo(char piece)
+{
+    pieceToMove = piece;
+
+    qDebug() << "scheduler piece to move: " << pieceToMove;
+}
+
 void Scheduler::chessgameEnd()
 {
 
@@ -235,6 +245,7 @@ void Scheduler::reset()
     f_scheduler.stateMsg = false;
 
     f_stockfish.connected = false;
+    f_stockfish.ready = false;
 
     f_eChessboard.connected = false;
     f_eChessboard.setupDone = false;
@@ -312,9 +323,15 @@ void Scheduler::mainLoop()
                                 f_chessgame.turn = !f_chessgame.turn;
 
                                 if (f_chessgame.turn) {
+
+                                    while (!f_stockfish.ready) {
+                                        schedulerMsg("Robot thinking!");
+                                        msleep(500);
+                                    }
+
                                     schedulerMsg("Black moving!");
 
-                                    emit sendRobotCommand("move_relative 0 0 0.05 0 0 0");
+                                    emit moveRobotToFirstField();
 
                                     msleep(500);
                                     while (f_robotCom.moving) {
@@ -331,7 +348,7 @@ void Scheduler::mainLoop()
                                         msleep(50);
                                     }
 
-                                    emit sendRobotCommand("move_relative 0 0 -0.05 0 0 0");
+                                    emit moveRobotToSecondField();
 
                                     msleep(500);
                                     while (f_robotCom.moving) {
@@ -360,6 +377,7 @@ void Scheduler::mainLoop()
                             else {
                                 schedulerMsg("Waiting for a move!");
                             }
+                            f_stockfish.ready = false;
                         }
                         else {
                             schedulerMsg("Error detected!");

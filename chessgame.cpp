@@ -295,3 +295,13 @@ void ChessGame::getChessboardOutput(const QByteArray &data)
         }
     }
 }
+
+void ChessGame::getPieceFromField(QString field)
+{
+    int x = field.toLower()[0].unicode() - 'A';
+    int y = field.toLower()[1].unicode() - '0' - 1;
+
+    qDebug() << "THE PIECE ABOUT TO MOVE: " << board_state[y][x] << x << y;
+
+    emit piece(board_state[y][x]);
+}
