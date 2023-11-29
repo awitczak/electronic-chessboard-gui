@@ -16,6 +16,8 @@ public:
 
     bool update_A1_pos, update_H8_pos, update_Z0_pos;
 
+    float current_Z;
+
 signals:
     void output(QString data);
     void moving();
@@ -39,6 +41,11 @@ public slots:
 
     void moveRobotToFirstField();
     void moveRobotToSecondField();
+    void moveRobotToZ0();
+    void moveRobotToZ(float Z);
+
+    void moveXYRelative(float X, float Y);
+    void moveZRelative(float Z);
 
 private slots:
     void errorOccurred(QProcess::ProcessError error);
@@ -82,7 +89,6 @@ private:
     void calculateRemainingCorners();
     void calculateChessboardReferenceAxes();
     void moveToPosition(QStringList targetPos);
-
     void moveToField(QString field);
 
 

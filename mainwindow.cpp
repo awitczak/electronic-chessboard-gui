@@ -53,7 +53,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(scheduler, &Scheduler::sendRobotCommand, robot_communication, &RobotCommunicationHandler::send);
     connect(scheduler, &Scheduler::moveRobotToFirstField, robot_communication, &RobotCommunicationHandler::moveRobotToFirstField);
     connect(scheduler, &Scheduler::moveRobotToSecondField, robot_communication, &RobotCommunicationHandler::moveRobotToSecondField);
-
+    connect(scheduler, &Scheduler::moveRobotToZ0, robot_communication, &RobotCommunicationHandler::moveRobotToZ0);
+    connect(scheduler, &Scheduler::moveRobotToZ, robot_communication, &RobotCommunicationHandler::moveRobotToZ);
 
     // -------------------------- UI -----------------------------
 
@@ -467,61 +468,41 @@ void MainWindow::initiateReset()
 void MainWindow::btn_positiveX_pressed()
 {
     float val = cb_distances->currentText().toFloat() / 100;
-    QByteArray bq_val;
-    bq_val.setNum(val);
 
-    QByteArray cmd = "move_relative " + bq_val + " 0 0 0 0 0";
-    robot_communication->send(cmd);
+    robot_communication->moveXYRelative(val, 0);
 }
 
 void MainWindow::btn_negativeX_pressed()
 {
-    float val = cb_distances->currentText().toFloat() / 100;
-    QByteArray bq_val;
-    bq_val.setNum(val);
+    float val = cb_distances->currentText().toFloat() / 100 * -1;
 
-    QByteArray cmd = "move_relative -" + bq_val + " 0 0 0 0 0";
-    robot_communication->send(cmd);
+    robot_communication->moveXYRelative(val, 0);
 }
 
 void MainWindow::btn_positiveY_pressed()
 {
     float val = cb_distances->currentText().toFloat() / 100;
-    QByteArray bq_val;
-    bq_val.setNum(val);
 
-    QByteArray cmd = "move_relative 0 " + bq_val + " 0 0 0 0";
-    robot_communication->send(cmd);
+    robot_communication->moveXYRelative(0, val);
 }
 
 void MainWindow::btn_negativeY_pressed()
 {
-    float val = cb_distances->currentText().toFloat() / 100;
-    QByteArray bq_val;
-    bq_val.setNum(val);
+    float val = cb_distances->currentText().toFloat() / 100 * -1;
 
-    QByteArray cmd = "move_relative 0 -" + bq_val + " 0 0 0 0";
-    robot_communication->send(cmd);
+    robot_communication->moveXYRelative(0, val);
 }
 
 void MainWindow::btn_positiveZ_pressed()
 {
     float val = cb_distances->currentText().toFloat() / 100;
-    QByteArray bq_val;
-    bq_val.setNum(val);
-
-    QByteArray cmd = "move_relative 0 0 " + bq_val + " 0 0 0";
-    robot_communication->send(cmd);
+    robot_communication->moveZRelative(val);
 }
 
 void MainWindow::btn_negativeZ_pressed()
 {
-    float val = cb_distances->currentText().toFloat() / 100;
-    QByteArray bq_val;
-    bq_val.setNum(val);
-
-    QByteArray cmd = "move_relative 0 0 -" + bq_val + " 0 0 0";
-    robot_communication->send(cmd);
+    float val = cb_distances->currentText().toFloat() / 100 * -1;
+    robot_communication->moveZRelative(val);
 }
 
 void MainWindow::btn_setH8_pressed()

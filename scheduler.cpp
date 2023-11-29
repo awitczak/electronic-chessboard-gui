@@ -331,38 +331,86 @@ void Scheduler::mainLoop()
 
                                     schedulerMsg("Black moving!");
 
-                                    emit moveRobotToFirstField();
+                                    emit sendGripperCommand("home");
+                                    msleep(1000);
+                                    while (!f_gripper.ready) {
+                                        // wait
+                                        // schedulerMsg("waiting for gripper");
+                                        msleep(50);
+                                    }
 
+                                    emit moveRobotToFirstField();
                                     msleep(500);
                                     while (f_robotCom.moving) {
                                         // wait
-                                        schedulerMsg("waiting for robot");
+                                        // schedulerMsg("waiting for robot");
                                         msleep(250);
                                     }
 
-                                    emit sendGripperCommand("home");
-
+                                    emit sendGripperCommand("open");
+                                    msleep(1000);
                                     while (!f_gripper.ready) {
                                         // wait
-                                        schedulerMsg("waiting for gripper");
+                                        // schedulerMsg("waiting for gripper");
                                         msleep(50);
+                                    }
+
+                                    emit moveRobotToZ0();
+                                    msleep(500);
+                                    while (f_robotCom.moving) {
+                                        // wait
+                                        // schedulerMsg("waiting for robot");
+                                        msleep(250);
+                                    }
+
+                                    emit sendGripperCommand(getPieceFromLetter(pieceToMove));
+                                    msleep(1000);
+                                    while (!f_gripper.ready) {
+                                        // wait
+                                        // schedulerMsg("waiting for gripper");
+                                        msleep(50);
+                                    }
+
+                                    emit moveRobotToZ(0.12);
+                                    msleep(500);
+                                    while (f_robotCom.moving) {
+                                        // wait
+                                        // schedulerMsg("waiting for robot");
+                                        msleep(250);
                                     }
 
                                     emit moveRobotToSecondField();
-
                                     msleep(500);
                                     while (f_robotCom.moving) {
                                         // wait
-                                        schedulerMsg("waiting for robot");
+                                        // schedulerMsg("waiting for robot");
                                         msleep(250);
                                     }
 
-                                    emit sendGripperCommand("home");
+                                    emit moveRobotToZ0();
+                                    msleep(1000);
+                                    while (f_robotCom.moving) {
+                                        // wait
+                                        // schedulerMsg("waiting for robot");
+                                        msleep(250);
+                                    }
 
+                                    msleep(250);
+                                    emit sendGripperCommand("open");
+                                    msleep(1000);
                                     while (!f_gripper.ready) {
                                         // wait
-                                        schedulerMsg("waiting for gripper");
+                                        // schedulerMsg("waiting for gripper");
                                         msleep(50);
+                                    }
+
+                                    msleep(500);
+                                    emit moveRobotToZ(0.12);
+                                    msleep(500);
+                                    while (f_robotCom.moving) {
+                                        // wait
+                                        // schedulerMsg("waiting for robot");
+                                        msleep(250);
                                     }
 
 
@@ -375,7 +423,7 @@ void Scheduler::mainLoop()
                                 }
                             }
                             else {
-                                schedulerMsg("Waiting for a move!");
+                                // schedulerMsg("Waiting for a move!");
                             }
                             f_stockfish.ready = false;
                         }
@@ -423,4 +471,33 @@ void Scheduler::mainLoop()
 void Scheduler::schedulerMsg(QString msg)
 {
     qDebug() << "SCH>> " << msg;
+}
+
+QString Scheduler::getPieceFromLetter(const char pieceLetter)
+{
+    QString piece = "";
+
+    QChar p = QChar::fromLatin1(pieceLetter);
+    p = p.toLower();
+
+    if (p == 'p') {
+        piece = "pawn";
+    }
+    else if (p == 'n') {
+        piece = "knight";
+    }
+    else if (p == 'b') {
+        piece = "bishop";
+    }
+    else if (p == 'r') {
+        piece = "rook";
+    }
+    else if (p == 'q') {
+        piece = "queen";
+    }
+    else if (p == 'k') {
+        piece = "king";
+    }
+
+    return piece;
 }

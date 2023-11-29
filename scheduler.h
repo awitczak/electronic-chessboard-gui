@@ -73,6 +73,8 @@ signals:
 
     void moveRobotToFirstField();
     void moveRobotToSecondField();
+    void moveRobotToZ0();
+    void moveRobotToZ(float Z);
 
 public slots:
     void stockfishConnected();
@@ -132,6 +134,7 @@ private:
     void mainLoop();
     void initFlags();
     void schedulerMsg(QString msg);
+    QString getPieceFromLetter(const char pieceLetter);
 
     char pieceToMove;
 

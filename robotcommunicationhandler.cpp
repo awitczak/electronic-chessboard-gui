@@ -38,6 +38,7 @@ RobotCommunicationHandler::RobotCommunicationHandler(QObject *parent)
     toField = "";
 
     Z0 = "";
+    current_Z = 0;
 }
 
 QString RobotCommunicationHandler::getPath() const
@@ -94,6 +95,8 @@ void RobotCommunicationHandler::setZ0()
 {
     Z0 = currentTCP[2];
 
+    current_Z = Z0.toFloat();
+
     qDebug() << "current Z0:" << Z0;
 }
 
@@ -115,6 +118,36 @@ void RobotCommunicationHandler::moveRobotToFirstField()
 void RobotCommunicationHandler::moveRobotToSecondField()
 {
     moveToField(toField);
+}
+
+void RobotCommunicationHandler::moveRobotToZ0()
+{
+    QString temp = "move_relative 0 0 " + QString::number(-current_Z + Z0.toFloat()) + " 0 0 0";
+
+    send(temp.toUtf8());
+}
+
+void RobotCommunicationHandler::moveRobotToZ(float Z)
+{
+    current_Z += Z;
+    QString temp = "move_relative 0 0 " + QString::number(Z) + " 0 0 0";
+
+    send(temp.toUtf8());
+}
+
+void RobotCommunicationHandler::moveXYRelative(float X, float Y)
+{
+    QString temp = "move_relative " + QString::number(X) + " " + QString::number(Y) + " 0 0 0 0";
+
+    send(temp.toUtf8());
+}
+
+void RobotCommunicationHandler::moveZRelative(float Z)
+{
+    current_Z += Z;
+    QString temp = "move_relative 0 0 " + QString::number(Z) + " 0 0 0";
+
+    send(temp.toUtf8());
 }
 
 void RobotCommunicationHandler::errorOccurred(QProcess::ProcessError error)
@@ -289,6 +322,8 @@ void RobotCommunicationHandler::calculateChessboardReferenceAxes()
 void RobotCommunicationHandler::moveToPosition(QStringList targetPos)
 {
     QString move_cmd = "move_absolute ";
+
+    targetPos[2] = QString::number(current_Z);
 
     for (auto p : targetPos) move_cmd += p + " ";
 
