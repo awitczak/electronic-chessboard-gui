@@ -120,11 +120,11 @@ MainWindow::MainWindow(QWidget *parent)
     QScrollArea* tab4 = new QScrollArea(tabWidget);
     QScrollArea* tab5 = new QScrollArea(tabWidget);
 
-    tabWidget->addTab(tab1, "Debug 1");
-    tabWidget->addTab(tab2, "Debug 2");
-    tabWidget->addTab(tab3, "Debug 3");
-    tabWidget->addTab(tab4, "Debug 4");
-    tabWidget->addTab(tab5, "Debug 5");
+    tabWidget->addTab(tab1, "Stockfish");
+    tabWidget->addTab(tab2, "eChessboard");
+    tabWidget->addTab(tab3, "Human Detection");
+    tabWidget->addTab(tab4, "Robot Interface");
+    tabWidget->addTab(tab5, "Gripper Interface");
 
     QWidget* tab1_widget = new QWidget(tab1);
     QWidget* tab2_widget = new QWidget(tab2);
@@ -379,7 +379,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(chess_game, &ChessGame::boardStateChanged, chessboard, &Chessboard::updateChessboard);
 
-    connect(this, &MainWindow::bestMoveFound, chessboard, &Chessboard::showBestMove);
+    connect(stockfish, &Stockfish::currentBestMove, chessboard, &Chessboard::showBestMove);
 
     connect(stockfish, &Stockfish::currentBestMove, robot_communication, &RobotCommunicationHandler::setCurrentMove);
 
