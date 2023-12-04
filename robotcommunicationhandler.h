@@ -14,9 +14,11 @@ public:
     QString getPath() const;
     void setPath(const QString &path);
 
-    bool update_A1_pos, update_H8_pos, update_Z0_pos;
+    bool update_A1_pos, update_H8_pos, update_Z0_pos, update_bucket_pos;
 
     float current_Z;
+
+
 
 signals:
     void output(QString data);
@@ -27,6 +29,7 @@ signals:
 
     void tcp_updated(QString field);
     void tcp_Z0_updated();
+    void bucket_tcp_updated();
 
     void getPieceFromField(QString field);
 
@@ -37,12 +40,13 @@ public slots:
 
     void setChessboardCornerPos(QString corner);
     void setZ0();
+    void setBucketPos();
     void setCurrentMove(QString move);
 
     void moveRobotToFirstField();
     void moveRobotToSecondField();
+    void moveRobotToBucket();
     void moveRobotToZ0();
-    void moveRobotToZ(float Z);
 
     void moveXYRelative(float X, float Y);
     void moveZRelative(float Z);
@@ -85,6 +89,7 @@ private:
     QStringList cornerPos_H1;
     QStringList cornerPos_H8;
     QStringList centerPos;
+    QStringList bucketPos;
 
     void calculateRemainingCorners();
     void calculateChessboardReferenceAxes();

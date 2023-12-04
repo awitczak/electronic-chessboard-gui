@@ -36,7 +36,8 @@ public:
 
 public slots:
     void getChessboardOutput(const QByteArray &data);
-    void getPieceFromField(QString field);
+    char getPieceFromField(QString field);
+    void getBestMove(QString bestMove);
     void resetChessGame();
 
 signals:
@@ -49,6 +50,11 @@ signals:
     void initBoardSetupWait();
     void returnToPositionWait();
     void returnToPositionDone();
+    void normalMove();
+    void captureMove();
+    void shortCastleMove();
+    void longCastleMove();
+    void promotionMove();
 
     void piece(char piece);
 

@@ -167,6 +167,8 @@ void Stockfish::getCurrentBestMove(QString data)
         emit currentBestMove(bestMove);
 
 
+
+
         qDebug() << "stockfish emitted ready!";
         emit ready();
     }

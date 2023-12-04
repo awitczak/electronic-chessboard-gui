@@ -31,6 +31,12 @@ MainWindow::MainWindow(QWidget *parent)
     connect(chess_game, &ChessGame::returnToPositionDone, scheduler, &Scheduler::eChessboardReturnToPositionDone);
     connect(chess_game, &ChessGame::returnToPositionWait, scheduler, &Scheduler::eChessboardReturnToPositionWait);
     connect(chess_game, &ChessGame::movePlayed, scheduler, &Scheduler::eChessboardMovePlayed);
+    connect(chess_game, &ChessGame::normalMove, scheduler, &Scheduler::chessgameNormalMove);
+    connect(chess_game, &ChessGame::captureMove, scheduler, &Scheduler::chessgameCaptureMove);
+    connect(chess_game, &ChessGame::shortCastleMove, scheduler, &Scheduler::chessgameShortCastleMove);
+    connect(chess_game, &ChessGame::longCastleMove, scheduler, &Scheduler::chessgameLongCastleMove);
+    connect(chess_game, &ChessGame::promotionMove, scheduler, &Scheduler::chessgamePromotionMove);
+
 
     // connecting object_detection
     connect(object_detection, &ObjectDetectionHandler::connected, scheduler, &Scheduler::objectDetectionConnected);
@@ -53,8 +59,10 @@ MainWindow::MainWindow(QWidget *parent)
     connect(scheduler, &Scheduler::sendRobotCommand, robot_communication, &RobotCommunicationHandler::send);
     connect(scheduler, &Scheduler::moveRobotToFirstField, robot_communication, &RobotCommunicationHandler::moveRobotToFirstField);
     connect(scheduler, &Scheduler::moveRobotToSecondField, robot_communication, &RobotCommunicationHandler::moveRobotToSecondField);
+    connect(scheduler, &Scheduler::moveRobotToBucket, robot_communication, &RobotCommunicationHandler::moveRobotToBucket);
     connect(scheduler, &Scheduler::moveRobotToZ0, robot_communication, &RobotCommunicationHandler::moveRobotToZ0);
-    connect(scheduler, &Scheduler::moveRobotToZ, robot_communication, &RobotCommunicationHandler::moveRobotToZ);
+    connect(scheduler, &Scheduler::moveRobotToZ, robot_communication, &RobotCommunicationHandler::moveZRelative);
+    connect(scheduler, &Scheduler::moveRobotToXY, robot_communication, &RobotCommunicationHandler::moveXYRelative);
 
     // -------------------------- UI -----------------------------
 
@@ -292,6 +300,7 @@ MainWindow::MainWindow(QWidget *parent)
     QPushButton *btn_setA1 = new QPushButton();
     QPushButton *btn_setH8 = new QPushButton();
     QPushButton *btn_setZ0 = new QPushButton();
+    QPushButton *btn_setBucketXY = new QPushButton();
 
 
     btn_positiveX->setText("X+");
@@ -304,6 +313,7 @@ MainWindow::MainWindow(QWidget *parent)
     btn_setA1->setText("set A1 corner");
     btn_setH8->setText("set H8 corner");
     btn_setZ0->setText("set Z0");
+    btn_setBucketXY->setText("set bucket XY");
 
     controlPanelLayout->addWidget(btn_negativeX);
     controlPanelLayout->addWidget(btn_positiveX);
@@ -315,6 +325,7 @@ MainWindow::MainWindow(QWidget *parent)
     controlPanelLayout->addWidget(btn_setA1);
     controlPanelLayout->addWidget(btn_setH8);
     controlPanelLayout->addWidget(btn_setZ0);
+    controlPanelLayout->addWidget(btn_setBucketXY);
 
     connect(btn_positiveX, &QPushButton::pressed, this, &MainWindow::btn_positiveX_pressed);
     connect(btn_negativeX, &QPushButton::pressed, this, &MainWindow::btn_negativeX_pressed);
@@ -325,11 +336,15 @@ MainWindow::MainWindow(QWidget *parent)
     connect(btn_setA1, &QPushButton::pressed, this, &MainWindow::btn_setA1_pressed);
     connect(btn_setH8, &QPushButton::pressed, this, &MainWindow::btn_setH8_pressed);
     connect(btn_setZ0, &QPushButton::pressed, this, &MainWindow::btn_setZ0_pressed);
+    connect(btn_setBucketXY, &QPushButton::pressed, this, &MainWindow::btn_setBucketXY_pressed);
 
     connect(robot_communication, &RobotCommunicationHandler::tcp_updated, this, &MainWindow::tcp_updated);
+    connect(robot_communication, &RobotCommunicationHandler::bucket_tcp_updated, this, &MainWindow::bucket_tcp_updated);
     connect(robot_communication, &RobotCommunicationHandler::tcp_Z0_updated, this, &MainWindow::tcp_Z0_updated);
     connect(this, &MainWindow::setGripperZ0, robot_communication, &RobotCommunicationHandler::setZ0);
     connect(this, &MainWindow::setCornerPos, robot_communication, &RobotCommunicationHandler::setChessboardCornerPos);
+    connect(this, &MainWindow::setBucketPos, robot_communication, &RobotCommunicationHandler::setBucketPos);
+
 
 
     tab4WidgetLayout->addWidget(lbl_robot_communication_output);
@@ -381,12 +396,14 @@ MainWindow::MainWindow(QWidget *parent)
     connect(chess_game, &ChessGame::boardStateChanged, chessboard, &Chessboard::updateChessboard);
 
     connect(stockfish, &Stockfish::currentBestMove, chessboard, &Chessboard::showBestMove);
-
+    connect(stockfish, &Stockfish::currentBestMove, chess_game, &ChessGame::getBestMove);
     connect(stockfish, &Stockfish::currentBestMove, robot_communication, &RobotCommunicationHandler::setCurrentMove);
 
     connect(chess_game, &ChessGame::sendFENtoStockfish, stockfish, &Stockfish::updateFEN);
 
     connect(chess_game, &ChessGame::whoseTurnInfo, evaluationBar, &EvaluationBar::flipTurns);
+
+
 
     // reset chessboard gui, chess game info and stockfish
     connect(this, &MainWindow::reset, chessboard, &Chessboard::resetChessboard);
@@ -517,6 +534,12 @@ void MainWindow::btn_setZ0_pressed()
     robot_communication->update_Z0_pos = true;
 }
 
+void MainWindow::btn_setBucketXY_pressed()
+{
+    robot_communication->send("get_tcp_pos");
+    robot_communication->update_bucket_pos = true;
+}
+
 void MainWindow::tcp_updated(QString field)
 {
     emit setCornerPos(field);
@@ -525,6 +548,11 @@ void MainWindow::tcp_updated(QString field)
 void MainWindow::tcp_Z0_updated()
 {
     emit setGripperZ0();
+}
+
+void MainWindow::bucket_tcp_updated()
+{
+    emit setBucketPos();
 }
 
 void MainWindow::btn_setA1_pressed()

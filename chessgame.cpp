@@ -282,6 +282,12 @@ void ChessGame::getChessboardOutput(const QByteArray &data)
         emit sendFENtoStockfish(QByteArray::fromStdString(FEN));
         emit whoseTurnInfo(whoseTurn);
 
+//        if (dataList[2].contains("x")) emit captureMove();
+//        else if (dataList[2].contains("O-O-O")) emit longCastleMove();
+//        else if (dataList[2].contains("O-O")) emit shortCastleMove();
+//        else if (dataList[2].contains("=")) emit promotionMove();
+//        else emit normalMove();
+
         emit movePlayed();
     }
 
@@ -296,10 +302,29 @@ void ChessGame::getChessboardOutput(const QByteArray &data)
     }
 }
 
-void ChessGame::getPieceFromField(QString field)
+char ChessGame::getPieceFromField(QString field)
 {
     int x = field[0].unicode() - 'A';
     int y = field[1].unicode() - '0' - 1;
 
     emit piece(board_state[7 - y][x]);
+
+    return board_state[7 - y][x];
+}
+
+void ChessGame::getBestMove(QString bestMove)
+{
+    QString fromField = bestMove.mid(0, 2).toUpper();
+    QString toField = bestMove.mid(2).toUpper();
+
+    if (getPieceFromField(toField) == '0') {
+        emit normalMove();
+
+        qDebug() << "Normal move!";
+    }
+    else {
+        emit captureMove();
+
+        qDebug() << "Capture move!";
+    }
 }

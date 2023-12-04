@@ -42,6 +42,7 @@ signals:
     void bestMoveFound(QString best_move);
     void setCornerPos(QString cornerPos);
     void setGripperZ0();
+    void setBucketPos();
     void reset();
 
 private slots:
@@ -62,9 +63,11 @@ private slots:
     void btn_setA1_pressed();
     void btn_setH8_pressed();
     void btn_setZ0_pressed();
+    void btn_setBucketXY_pressed();
 
     void tcp_updated(QString field);
     void tcp_Z0_updated();
+    void bucket_tcp_updated();
 
     // buttons
 //    void btn_forwards_pressed();

@@ -19,6 +19,7 @@ RobotCommunicationHandler::RobotCommunicationHandler(QObject *parent)
     cornerPos_A8 = {"0", "0", "0", "0", "0", "0"};
     cornerPos_H1 = {"0", "0", "0", "0", "0", "0"};
     cornerPos_H8 = {"0", "0", "0", "0", "0", "0"};
+    bucketPos = {"0", "0", "0", "0", "0", "0"};
 
     A1_set = false;
     H8_set = false;
@@ -100,6 +101,11 @@ void RobotCommunicationHandler::setZ0()
     qDebug() << "current Z0:" << Z0;
 }
 
+void RobotCommunicationHandler::setBucketPos()
+{
+    bucketPos = currentTCP;
+}
+
 void RobotCommunicationHandler::setCurrentMove(QString move)
 {
     fromField = move.mid(0, 2).toUpper();
@@ -120,17 +126,15 @@ void RobotCommunicationHandler::moveRobotToSecondField()
     moveToField(toField);
 }
 
+void RobotCommunicationHandler::moveRobotToBucket()
+{
+    moveToPosition(bucketPos);
+}
+
 void RobotCommunicationHandler::moveRobotToZ0()
 {
     QString temp = "move_relative 0 0 " + QString::number(-current_Z + Z0.toFloat()) + " 0 0 0";
-
-    send(temp.toUtf8());
-}
-
-void RobotCommunicationHandler::moveRobotToZ(float Z)
-{
-    current_Z += Z;
-    QString temp = "move_relative 0 0 " + QString::number(Z) + " 0 0 0";
+    current_Z = Z0.toFloat();
 
     send(temp.toUtf8());
 }
@@ -266,6 +270,10 @@ void RobotCommunicationHandler::processOutput(QString data)
         if (update_Z0_pos) {
             emit tcp_Z0_updated();
             update_Z0_pos = false;
+        }
+        if (update_bucket_pos) {
+            emit bucket_tcp_updated();
+            update_bucket_pos = false;
         }
     }
 }

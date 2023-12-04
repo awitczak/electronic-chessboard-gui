@@ -37,6 +37,11 @@ typedef struct {
     bool started;
     bool finished;
     bool turn;
+    bool normal;
+    bool capture;
+    bool shortCastle;
+    bool longCastle;
+    bool promotion;
 
 } chessgameFlags;
 
@@ -74,7 +79,9 @@ signals:
     void moveRobotToFirstField();
     void moveRobotToSecondField();
     void moveRobotToZ0();
+    void moveRobotToBucket();
     void moveRobotToZ(float Z);
+    void moveRobotToXY(float X, float Z);
 
 public slots:
     void stockfishConnected();
@@ -114,6 +121,11 @@ public slots:
     void chessgameWhiteMove();
     void chessgameBlackMove();
     void chessgamePieceInfo(char piece);
+    void chessgameNormalMove();
+    void chessgameCaptureMove();
+    void chessgameShortCastleMove();
+    void chessgameLongCastleMove();
+    void chessgamePromotionMove();
     void chessgameEnd();
 
     void reset();
@@ -137,6 +149,8 @@ private:
     QString getPieceFromLetter(const char pieceLetter);
 
     char pieceToMove;
+
+    void sendGripperCmd(QString cmd);
 
 };
 
